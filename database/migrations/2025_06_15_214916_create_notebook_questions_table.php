@@ -13,7 +13,7 @@ return new class extends Migration {
             $table->foreignId('notebook_id')->constrained()->onDelete('cascade');
             $table->foreignId('question_id')->constrained()->onDelete('cascade');
             $table->tinyInteger('question_position')->default(1);
-            $table->foreignId('answer_id')->nullable()->constrained('alternatives')->nullOnDelete();
+            $table->foreignId('answer_id')->nullable()->constrained('question_alternatives')->nullOnDelete();
             $table->tinyInteger('answer_result')->default(0); // 0 = sem resposta, 1 = correta, 2 = incorreta
             $table->timestamps();
             $table->softDeletes();
