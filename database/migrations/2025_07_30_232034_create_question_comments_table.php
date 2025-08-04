@@ -12,7 +12,7 @@ return new class extends Migration {
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('user_answer_id')->nullable()->constrained('users')->onDelete('cascade');
             $table->foreignId('question_id')->constrained()->onDelete('cascade');
-            $table->foreignId('comment_id')->nullable()->constrained()->onDelete('cascade');
+            $table->foreignId('comment_id')->nullable()->constrained('question_comments')->onDelete('cascade');
             $table->longText('comment');
             $table->longText('comment_answer')->nullable();
             $table->timestamps();
