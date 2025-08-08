@@ -7,11 +7,10 @@
                 <h5 class="card-action-title mb-0">Dados do Perfil</h5>
             </div>
             <div class="card-body">
-                <form action="{{ route('updated-user', ['id' => $user->id]) }}" method="POST" class="row">
+                <form action="{{ route('updated-user', ['uuid' => $user->uuid]) }}" method="POST" class="row">
                     @csrf
                     <div class="col-12 col-sm-12 col-md-12 col-lg-12 d-flex justify-content-center align-items-center flex-column text-center mb-2">
-                        <img src="{{ Auth::user()->photo ? Storage::url(Auth::user()->photo) : asset('assets/img/avatars/man.png') }}" alt="Perfil de {{ Auth::user()->name }}" class="d-block w-px-100 h-px-100 rounded-4" id="uploadedAvatar" style="cursor: pointer;"/>
-                        <input type="file" id="avatarInput" name="photo" accept="image/*" class="d-none">
+                        <img src="{{ Auth::user()->photo ? asset('storage/'.Auth::user()->photo) : asset('assets/img/avatars/man.png') }}" alt="Perfil de {{ Auth::user()->name }}" class="d-block w-px-100 h-px-100 rounded-4" id="change-photo-button" style="cursor: pointer;"/>
                     </div>
                     <div class="col-12 mb-2">
                         <div class="form-floating form-floating-outline">
@@ -113,15 +112,23 @@
         </div>
     </div>
 
+    <form action="{{ route('updated-user', ['uuid' => $user->uuid]) }}" method="POST" enctype="multipart/form-data" id="photo-upload-form" class="d-none">
+        @csrf
+        <input type="hidden" name="uuid" value="{{ $user->uuid }}">
+        <input type="file" name="photo" id="photo-input" accept="image/*" onchange="document.getElementById('photo-upload-form').submit();">
+    </form>
+
      <script>
-        document.getElementById('uploadedAvatar').addEventListener('click', function () {
-            document.getElementById('avatarInput').click();
+        document.getElementById('change-photo-button').addEventListener('click', function() {
+            document.getElementById('photo-input').click();
         });
-    
-        document.getElementById('avatarInput').addEventListener('change', function () {
-            if (this.files.length > 0) {
-                document.getElementById('avatarForm').submit();
-            }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('input[type="file"]').forEach(input => {
+                input.addEventListener("change", function() {
+                    this.closest("form").submit();
+                });
+            });
         });
     </script>
 

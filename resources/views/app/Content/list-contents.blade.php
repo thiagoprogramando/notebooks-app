@@ -136,8 +136,8 @@
         <div class="card demo-inline-spacing">
             <div class="list-group p-0 m-0">
                 @foreach ($contents as $content)
-                    <div class="list-group-item list-group-item-action d-flex align-items-center cursor-pointer waves-effect waves-light">
-                        <img src="{{ $content->cover_image ? asset($content->cover_image) : asset('assets/img/avatars/man.png') }}" alt="Conteúdo Imagem" class="rounded-circle me-3" width="40">
+                    <div onclick="window.location.href='{{ route('content', ['id' => $content->id]) }}'" class="list-group-item list-group-item-action d-flex align-items-center cursor-pointer waves-effect waves-light">
+                        <img src="{{ $content->cover_image ? asset('storage/'.$content->cover_image) : asset('assets/img/avatars/man.png') }}" alt="Conteúdo Imagem" class="rounded-circle me-3" width="40">
                         <div class="w-100">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div class="user-info">
@@ -156,12 +156,12 @@
                                 </div>
                                 <form action="{{ route('deleted-content', ['id' => $content->id]) }}" method="POST" class="add-btn delete">
                                     @csrf
-                                    <a href="{{ route('content', ['id' => $content->id]) }}" class="btn btn-success text-white btn-sm"><i class="ri-menu-search-line"></i></a>
-                                    <button type="submit" class="btn btn-danger btn-sm"><i class="ri-delete-bin-line"></i></button>
+                                    <a href="{{ route('content', ['id' => $content->id]) }}" class="btn btn-success text-white btn-sm" title="Acessar Conteúdo"><i class="ri-menu-search-line"></i></a>
+                                    <button type="submit" class="btn btn-danger btn-sm" title="Excluir Conteúdo"><i class="ri-delete-bin-line"></i></button>
                                 </form>
                             </div>
                         </div>
-                    </div>  
+                    </div> 
                 @endforeach
             </div>
         </div>

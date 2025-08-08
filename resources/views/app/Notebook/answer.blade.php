@@ -35,7 +35,7 @@
                                 <button type="button" class="btn btn-outline-secondary" title="Estátisticas"> <i class="tf-icons ri-pie-chart-line"></i></button>
                                 <a href="{{ route('notebook', ['id' => $notebook->id]) }}" title="Editar Caderno" class="btn btn-outline-secondary"> <i class="tf-icons ri-filter-3-line"></i> </a>
                                 <button type="button" class="btn btn-outline-secondary" title="Alertar Problema" data-bs-toggle="modal" data-bs-target="#createdTicketModal"> <i class="tf-icons ri-alarm-warning-line"></i></button>
-                                <button type="button" class="btn btn-outline-secondary" title="Comentário do Professor" class="btn btn-dark" data-bs-toggle="popover" data-bs-placement="top" data-bs-custom-class="popover-dark" data-bs-content="{{ $questions->first()->question->resolution }}">
+                                <button type="button" class="btn btn-outline-secondary" title="Comentários do Professor" data-bs-toggle="collapse" href="#collapseTeacher" role="button" aria-expanded="false" aria-controls="collapseTeacher">
                                     <i class="tf-icons ri-chat-quote-line"></i>
                                 </button>
                                 <button type="button" class="btn btn-outline-secondary" title="Comentários da Questão" data-bs-toggle="collapse" href="#collapseComments" role="button" aria-expanded="false" aria-controls="collapseComments">
@@ -46,7 +46,13 @@
                         </div>
                     </div>
 
-                     <div class="collapse" id="collapseComments">
+                    <div class="collapse mt-2 mb-3" id="collapseTeacher">
+                        <div class="p-4 border">
+                            {{ $questions->first()->question->resolution ?? 'Nenhum comentário do Professor!' }}
+                        </div>
+                    </div>
+
+                    <div class="collapse mt-2 mb-3" id="collapseComments">
                         <div class="row p-4 border">
                             <form action="{{ route('created-comment') }}" method="POST" class="col-12 col-sm-12 col-md-4 col-lg-4">
                                 @csrf
@@ -120,7 +126,7 @@
                             <div class="divider-text">Questão</div>
                         </div>
                     </div>
-                    <form action="" method="POST" class="col-12 col-sm-12 col-md-12 col-lg-12 row">
+                    <form id="answerForm" method="POST" class="col-12 col-sm-12 col-md-12 col-lg-12 row">
                         @csrf
                         @foreach($questions as $question)
                             <div class="col-12 col-sm-12 col-md-12 col-lg-12 bg-light p-3 rounded mt-1 mb-1">
@@ -157,7 +163,7 @@
 
     <script>
         function submitAnswer() {
-            const form = document.querySelector('form');
+            const form = document.getElementById('answerForm');
             form.action = "{{ route('answer-question') }}";
             form.submit();
         }
@@ -169,7 +175,7 @@
             }
 
             const deleteForm = document.getElementById('deleteForm');
-            deleteForm.action = `/answer-question/${questionId}`;
+            deleteForm.action = `/delete-question/${questionId}`;
             deleteForm.submit();
         }
     </script>

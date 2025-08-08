@@ -26,7 +26,7 @@ class AnswerController extends Controller {
         session(['answer' => true]);
 
         if ($notebookQuestions->isEmpty()) {
-            return redirect()->back()->with('infor', 'Você já respondeu todas as questões deste caderno!');
+            return redirect()->route('notebooks')->with('infor', 'Você já respondeu todas as questões deste caderno!');
         }
 
         return view('app.Notebook.answer', [
@@ -62,6 +62,20 @@ class AnswerController extends Controller {
         }
 
         return redirect()->back()->with('infor', 'Erro ao salvar a resposta. Tente novamente!');
+    }
+
+    public function destroy(Request $request, $id) {
+        
+        $notebookQuestion = NotebookQuestion::find($id);
+        if (!$notebookQuestion) {
+            return redirect()->back()->with('infor', 'Questão não encontrada!');
+        }
+
+        if ($notebookQuestion->delete()) {
+            return redirect()->back()->with('success', 'Questão deletada com sucesso!');
+        }
+
+        return redirect()->back()->with('infor', 'Erro ao deletar a questão. Tente novamente!');
     }
 
 }

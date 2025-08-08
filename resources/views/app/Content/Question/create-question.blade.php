@@ -37,8 +37,7 @@
                     </div>
                     <div class="col-12 col-sm-12 col-md-12 col-lg-12">
                         <div class="form-floating form-floating-outline mb-2">
-                            <textarea class="form-control h-px-100" name="title" id="question" placeholder="Ex: Qual é o único número primo par?" required></textarea>
-                            <label for="question">Questão</label>
+                            <textarea class="form-control h-px-100" name="title" id="question" placeholder="Questão:" required></textarea>
                         </div>
                     </div>
                     <div class="col-12 col-sm-12 col-md-12 col-lg-12 mt-3 mb-3">
@@ -67,8 +66,7 @@
                     </div>
                     <div class="col-12">
                         <div class="form-floating form-floating-outline mb-2">
-                            <textarea class="form-control h-px-100" name="resolution" id="resolution" placeholder="Ex: O número dois é o único PAR primo que existe..."></textarea>
-                            <label for="resolution">Resolução</label>
+                            <textarea class="form-control h-px-100" name="resolution" id="resolution" placeholder="Resolução / Comentário do Professor"></textarea>
                         </div>
                     </div>
                     <div class="col-12 btn-group">
@@ -80,5 +78,6 @@
         </div>
     </div>
 
+    <script src="https://cdn.tiny.cloud/1/tgezwiu6jalnw1mma8qnoanlxhumuabgmtavb8vap7357t22/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
     <script src="{{ asset('assets/js/question.js') }}"></script>
 @endsection

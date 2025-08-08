@@ -63,7 +63,7 @@ class NotebookController extends Controller {
                     }
                 ]);
             }
-        ])->get();
+        ])->orderBy('order', 'asc')->get();
 
         return view('app.Notebook.create-notebook', compact('contents'));
     }
@@ -143,7 +143,7 @@ class NotebookController extends Controller {
             NotebookQuestion::insert($allSelectedQuestions);
             DB::commit();
 
-            return redirect()->route('notebooks')->with('success', count($allSelectedQuestions) . ' questões adicionadas ao caderno com sucesso!');
+            return redirect()->route('answer', ['notebook' => $notebook->id])->with('success', count($allSelectedQuestions) . ' questões adicionadas ao caderno com sucesso!');
         } catch (\Exception $e) {
             DB::rollBack();
             report($e);

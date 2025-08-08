@@ -37,7 +37,7 @@
                 <p class="card-subtitle mb-3">Bem-vindo(a) ao {{ env('APP_NAME') }}</p>
                 <h4 class="text-primary mb-0">Plano Atual</h4>
                 <p class="mb-3">Aproveite os benefícios da sua conta! 🚀</p>
-                <a href="javascript:;" class="btn btn-sm btn-primary waves-effect waves-light">Gerar novo Caderno</a>
+                <a href="{{ route('create-notebook') }}" class="btn btn-sm btn-primary waves-effect waves-light">Gerar novo Caderno</a>
             </div>
             <img src="{{ asset('assets/img/illustrations/trophy.png') }}" class="position-absolute bottom-0 end-0 me-4" height="140" alt="view sales">
         </div>
@@ -72,7 +72,7 @@
                         </div>
                     </div>
                     <div class="card-info">
-                        <h5 class="mb-0">20</h5>
+                        <h5 class="mb-0">{{ Auth::user()->questions->count() }}</h5>
                         <p class="mb-0">Questões</p>
                     </div>
                     </div>

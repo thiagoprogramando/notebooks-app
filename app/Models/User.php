@@ -13,6 +13,7 @@ class User extends Authenticatable {
     use SoftDeletes;
 
     protected $fillable = [
+        'uuid',
         'photo',
         'name',
         'cpfcnpj',

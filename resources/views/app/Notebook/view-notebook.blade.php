@@ -97,8 +97,7 @@
                         </div>
                     </div>
 
-                     <div class="col-12 col-sm-12 col-md-2 col-lg-2">
-                     </div>
+                    <div class="col-12 col-sm-12 col-md-2 col-lg-2"></div>
 
                     <div class="col-12 col-sm-12 col-md-5 col-lg-5">
                         <div class="p-6">
@@ -116,7 +115,6 @@
                         </div>
                     </div>
                 </form>
-
             </div>
         </div>      
     </div>

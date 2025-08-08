@@ -63,14 +63,14 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/deleted-notebook/{id}', [NotebookController::class, 'destroy'])->name('deleted-notebook');
 
     Route::get('/users/{role}', [UserController::class, 'index'])->name('users');
-    Route::get('/user/{id}', [UserController::class, 'show'])->name('user');
+    Route::get('/user/{uuid}', [UserController::class, 'show'])->name('user');
     Route::post('/created-user/{role}', [UserController::class, 'store'])->name('created-user');
-    Route::post('/updated-user/{id}', [UserController::class, 'update'])->name('updated-user');
-    Route::post('/deleted-user/{id}', [UserController::class, 'destroy'])->name('deleted-user');
+    Route::post('/updated-user/{uuid}', [UserController::class, 'update'])->name('updated-user');
+    Route::post('/deleted-user/{uuid}', [UserController::class, 'destroy'])->name('deleted-user');
 
     Route::get('/answer/{notebook}/{question?}', [AnswerController::class, 'index'])->name('answer');
     Route::post('/answer-question', [AnswerController::class, 'update'])->name('answer-question');
-    Route::post('/delete-question/{id}', [NotebookController::class, 'delete'])->name('delete-question');
+    Route::post('/delete-question/{id}', [AnswerController::class, 'destroy'])->name('delete-question');
 
     
     Route::get('/logout', [LoginController::class, 'logout'])->name('logout');

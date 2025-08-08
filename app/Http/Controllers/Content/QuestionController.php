@@ -32,6 +32,7 @@ class QuestionController extends Controller {
         return view('app.Content.Question.list-questions', [
             'questions' => $query->paginate(30),
             'topic'     => $topic,
+            'boards'    => Board::orderBy('name', 'asc')->get(),
         ]);
     }
 
