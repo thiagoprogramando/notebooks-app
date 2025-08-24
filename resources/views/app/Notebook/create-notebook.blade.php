@@ -110,7 +110,7 @@
                                 <label for="title">Dê um nome ao Caderno:</label>
                             </div>
                             <input type="hidden" name="topics" id="selected-topics-hidden"/>
-                            <button type="submit" class="btn btn-success w-100 mt-2">Gerar Caderno</button>
+                            <button type="submit" class="btn btn-success w-100 mt-2">Gerar</button>
                         </div>
                     </div>
                 </form>

@@ -1,7 +1,7 @@
 @extends('app.layout')
 @section('content')
 
-    <div class="col-12 col-sm-12 col-md-7 col-lg-7">  
+    <div class="col-12 col-sm-12 col-md-12 col-lg-12">  
         <div class="card demo-inline-spacing">
             <div class="card-header">
                 <div class="d-flex justify-content-between">
@@ -37,7 +37,7 @@
                     </div>
                     <div class="col-12 col-sm-12 col-md-12 col-lg-12">
                         <div class="form-floating form-floating-outline mb-2">
-                            <textarea class="form-control h-px-100" name="title" id="question" placeholder="Questão:" required></textarea>
+                            <textarea class="form-control h-px-100" name="title" id="question" placeholder="Questão:"></textarea>
                         </div>
                     </div>
                     <div class="col-12 col-sm-12 col-md-12 col-lg-12 mt-3 mb-3">
