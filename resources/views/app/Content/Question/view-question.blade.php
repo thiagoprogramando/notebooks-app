@@ -30,7 +30,7 @@
                         <div class="form-floating form-floating-outline mb-2">
                             <div class="select2-primary">
                                 <select name="topic_id" id="topic_id" class="select2 form-select" required>
-                                    <option value="Opções Disponíveis" selected>Opções Disponíveis</option>
+                                    <option value="  " selected>Opções Disponíveis</option>
                                     @foreach ($topics as $topic)
                                         <option value="{{ $topic->id }}" @selected($topic->id == $question->topic_id)>{{ $topic->title }}</option>
                                     @endforeach

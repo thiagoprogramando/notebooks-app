@@ -35,7 +35,7 @@
                                 <select name="simulated_id" id="simulated_id" class="select2 form-select" required>
                                     <option value="  " selected>Opções Disponíveis</option>
                                     @foreach ($simulateds as $simulated)
-                                        <option value="{{ $simulated->id }}" @selected($simulatedSelect->id = $simulated->id)>{{ $simulated->title }}</option>
+                                        <option value="{{ $simulated->id }}" @selected(optional($simulatedSelect)->id == $simulated->id)>{{ $simulated->title }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -44,7 +44,7 @@
                     </div>
                     <div class="col-12 col-sm-12 col-md-2 col-lg-2">
                         <div class="form-floating form-floating-outline mb-2">
-                            <input type="number" class="form-control" name="simulated_question_position" id="simulated_question_position" placeholder="Ex: 1" value="{{ $nextOrder }}">
+                            <input type="number" class="form-control" name="simulated_question_position" id="simulated_question_position" placeholder="Ex: 1" value="{{ $nextOrder ?? old('simulated_question_position') }}">
                             <label for="simulated_question_position">Ordem (Simulado)</label>
                         </div>
                     </div>
@@ -63,7 +63,7 @@
                     </div>
                     <div class="col-12 col-sm-12 col-md-12 col-lg-12">
                        <div class="full-editor">
-                            <h6>Dados da Questão</h6>
+                            {!! old('title') ?? '<h6>Dados da Questão</h6>' !!}
                         </div>
                         <textarea name="title" id="title" hidden></textarea>
                     </div>

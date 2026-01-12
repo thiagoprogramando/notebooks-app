@@ -10,6 +10,7 @@ use App\Models\Simulated;
 use App\Models\Topic;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class QuestionController extends Controller {
     
@@ -116,6 +117,8 @@ class QuestionController extends Controller {
             'correct'       => 'required',
         ], [
             'title.required'    => 'É necessário informar um texto para a questão.',
+            'board_id.required'   => 'Selecione a banca examinadora da questão.',
+            'board_id.exists'     => 'A banca examinadora selecionada é inválida.',
             'alternative.min'   => 'Informe no mínimo duas alternativas.',
             'correct.required'  => 'Selecione uma alternativa como correta.',
         ]);
@@ -124,31 +127,80 @@ class QuestionController extends Controller {
             return back()->withErrors(['correct' => 'Apenas uma alternativa pode ser marcada como correta!'])->withInput();
         }
 
-        $question           = new Question();
-        $question->topic_id = $request->topic_id;
-        $question->board_id = $request->board_id;
-        $question->title                         = $request->title;
-        $question->resolution                    = $request->resolution;
-        $question->simulated_id                  = $request->simulated_id;
-        $question->simulated_question_position   = $request->simulated_question_position ?? 0;
-        if ($question->save()) {
+        try {
+            DB::transaction(function () use ($request) {
 
-            foreach ($request->alternative as $index => $text) {
-                $label      = chr(65 + $index);
-                $isCorrect  = in_array($index, $request->correct) ? 1 : 0;
-
-                $question->alternatives()->create([
-                    'label'         => $label,
-                    'text'          => $text,
-                    'is_correct'    => $isCorrect,
+                $question = Question::create([
+                    'topic_id'                      => $request->topic_id,
+                    'board_id'                      => $request->board_id,
+                    'title'                         => $request->title,
+                    'resolution'                    => $request->resolution,
+                    'simulated_id'                  => $request->simulated_id,
+                    'simulated_question_position'   => $request->simulated_question_position ?? 0,
                 ]);
-            }
 
-            return redirect()->route('create-question', ['topic' => $request->topic_id, 'simulated' => $request->simulated_id])->with('success', 'Questão criada com sucesso! Você pode continuar criando novas questões.');
+                foreach ($request->alternative as $index => $text) {
+                    $question->alternatives()->create([
+                        'label'         => chr(65 + $index),
+                        'text'          => $text,
+                        'is_correct'    => in_array($index, (array) $request->correct),
+                    ]);
+                }
+            });
+
+            return redirect()
+                ->route('create-question', [
+                    'topic'     => $request->topic_id,
+                    'simulated' => $request->simulated_id
+                ])->with('success', 'Questão criada com sucesso! Você pode continuar criando novas questões.');
+
+        } catch (\Throwable $e) {
+            return back()->with('error', 'Falha ao criar a questão, tente novamente!')->withInput();
         }
-
-        return redirect()->back()->with('error', 'Falha ao criar a questão, tente novamente!');
     }
+
+    // public function store(Request $request) {
+
+    //     $request->validate([
+    //         'title'         => 'required|string',
+    //         'board_id'      => 'required|exists:boards,id',
+    //         'alternative'   => 'required|array|min:2',
+    //         'correct'       => 'required',
+    //     ], [
+    //         'title.required'    => 'É necessário informar um texto para a questão.',
+    //         'alternative.min'   => 'Informe no mínimo duas alternativas.',
+    //         'correct.required'  => 'Selecione uma alternativa como correta.',
+    //     ]);
+
+    //     if (is_array($request->correct) && count($request->correct) !== 1) {
+    //         return back()->withErrors(['correct' => 'Apenas uma alternativa pode ser marcada como correta!'])->withInput();
+    //     }
+
+    //     $question           = new Question();
+    //     $question->topic_id = $request->topic_id;
+    //     $question->board_id = $request->board_id;
+    //     $question->title                         = $request->title;
+    //     $question->resolution                    = $request->resolution;
+    //     $question->simulated_id                  = $request->simulated_id;
+    //     $question->simulated_question_position   = $request->simulated_question_position ?? 0;
+    //     if ($question->save()) {
+
+    //         foreach ($request->alternative as $index => $text) {
+    //             $label      = chr(65 + $index);
+    //             $isCorrect  = in_array($index, $request->correct) ? 1 : 0;
+
+    //             $question->alternatives()->create([
+    //                 'label'         => $label,
+    //                 'text'          => $text,
+    //                 'is_correct'    => $isCorrect,
+    //             ]);
+    //         }
+
+    //         return redirect()->route('create-question', ['topic' => $request->topic_id, 'simulated' => $request->simulated_id])->with('success', 'Questão criada com sucesso! Você pode continuar criando novas questões.');
+    //     }
+
+    //     return redirect()->back()->with('error', 'Falha ao criar a questão, tente novamente!');
+    // }
 
     public function update(Request $request, $id) {
         
