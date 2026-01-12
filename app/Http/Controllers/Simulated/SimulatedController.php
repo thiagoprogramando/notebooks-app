@@ -188,6 +188,8 @@ class SimulatedController extends Controller {
 
     public function buy (Request $request, $uuid) {
 
+        $assasController = new AssasController();
+
         $simulated = Simulated::where('uuid', $uuid)->first();
         if (!$simulated) {
             return redirect()->back()->with('error', 'Simulado não encontrado!');
@@ -202,34 +204,55 @@ class SimulatedController extends Controller {
             ->where('simulated_id', $simulated->id)
             ->update(['payment_status' => 2]);
 
-        $assasController    = new AssasController();
+        if (env('APP_ENV') == 'local') {
+            
+            $invoice                  = new Invoice();
+            $invoice->uuid            = Str::uuid();
+            $invoice->user_id         = Auth::user()->id;
+            $invoice->simulated_id    = $simulated->id;
+            $invoice->payment_status  = 1;
+            $invoice->value           = $simulated->value;
+            $invoice->due_date        = now()->addDays(3);
+            $invoice->payment_token   = Str::uuid();
+            $invoice->payment_url     = '#';
+            if ($invoice->save()) {
 
-        $customer = $assasController->createdCustomer(Auth::user()->name, Auth::user()->cpfcnpj, Auth::user()->phone, Auth::user()->email);
-        if ($customer === false) {
-            return redirect()->back()->with('error', 'Verfique seus dados e tente novamente!');   
-        }
+                $assasController->generateSimulatedForUser($invoice->user, $invoice->simulated);
 
-        $charge = $assasController->createdCharge($customer, $request->payment_method, $request->payment_installments, $value = $simulated->value, $description = 'Compra do Simulado: ' . $simulated->title, now()->addDays(3), $commissions = null);
-        if ($charge === false) {
-            return redirect()->back()->with('error', 'Falha ao gerar a cobrança, tente novamente!');   
-        }
-
-        $invoice                  = new Invoice();
-        $invoice->uuid            = Str::uuid();
-        $invoice->user_id         = Auth::user()->id;
-        $invoice->simulated_id    = $simulated->id;
-        $invoice->payment_status  = 0;
-        $invoice->value           = $simulated->value;
-        $invoice->due_date        = now()->addDays(3);
-        $invoice->payment_splits  = $charge['paymentSplits'] ?? null;
-        $invoice->payment_token   = $charge['id'];
-        $invoice->payment_url     = $charge['invoiceUrl'];
-        $invoice->payment_status  = 0;
-        if ($invoice->save()) {
-            return redirect($charge['invoiceUrl']);
+                return redirect()->back()->with('infor', 'Compra aprovada em SANDBOX!');
+            }
+            
+            return redirect()->back()->with('error', 'Falha ao gerar a cobrança, tente novamente!');
         } else {
+
+            $customer = $assasController->createdCustomer(Auth::user()->name, Auth::user()->cpfcnpj, Auth::user()->phone, Auth::user()->email);
+            if ($customer === false) {
+                return redirect()->back()->with('error', 'Verfique seus dados e tente novamente!');   
+            }
+
+            $charge = $assasController->createdCharge($customer, $request->payment_method, $request->payment_installments, $value = $simulated->value, $description = 'Compra do Simulado: ' . $simulated->title, now()->addDays(3), $commissions = null);
+            if ($charge === false) {
+                return redirect()->back()->with('error', 'Falha ao gerar a cobrança, tente novamente!');   
+            }
+
+            $invoice                  = new Invoice();
+            $invoice->uuid            = Str::uuid();
+            $invoice->user_id         = Auth::user()->id;
+            $invoice->simulated_id    = $simulated->id;
+            $invoice->value           = $simulated->value;
+            $invoice->due_date        = now()->addDays(3);
+            $invoice->payment_splits  = $charge['paymentSplits'] ?? null;
+            $invoice->payment_token   = $charge['id'];
+            $invoice->payment_url     = $charge['invoiceUrl'];
+            $invoice->payment_status  = 0;
+            if ($invoice->save()) {
+                return redirect($charge['invoiceUrl']);
+            }
+
             return redirect()->back()->with('error', 'Falha ao gerar a cobrança, tente novamente!');
         }
+
+        return redirect()->back()->with('error', 'Módulo indisponível!');
     }
 
     private function formatValue ($valor) {

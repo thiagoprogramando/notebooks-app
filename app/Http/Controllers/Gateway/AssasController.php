@@ -177,7 +177,7 @@ class AssasController extends Controller {
         return response()->json(['message' => 'Nenhum Evento disponível!'], 200);
     }
 
-    private function generateSimulatedForUser($user, $simulated) {
+    public function generateSimulatedForUser($user, $simulated) {
 
         $questions = $simulated->questions;
         $position  = 1;
