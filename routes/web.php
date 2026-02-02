@@ -14,6 +14,7 @@ use App\Http\Controllers\Finance\BuyController;
 use App\Http\Controllers\Finance\InvoiceController;
 use App\Http\Controllers\Notebook\AnswerController;
 use App\Http\Controllers\Notebook\NotebookController;
+use App\Http\Controllers\Product\FinanceController;
 use App\Http\Controllers\Product\PlanController;
 use App\Http\Controllers\Product\ProductController;
 use App\Http\Controllers\SearchController;
@@ -87,6 +88,10 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/created-product', [ProductController::class, 'store'])->name('created-product');
         Route::post('/updated-product/{uuid}', [ProductController::class, 'update'])->name('updated-product');
         Route::post('/deleted-product/{uuid}', [ProductController::class, 'destroy'])->name('deleted-product');
+
+        Route::get('/finances', [FinanceController::class, 'index'])->name('finances');
+        Route::post('/updated-finance/{uuid}', [FinanceController::class, 'update'])->name('updated-finance');
+        Route::post('/deleted-finance/{uuid}', [FinanceController::class, 'destroy'])->name('deleted-finance');
 
         Route::post('/created-product-item-file/{uuid}', [ProductController::class, 'storeFile'])->name('created-product-item-file');
         Route::post('/deleted-product-item-file/{uuid}/{id}', [ProductController::class, 'destroyFile'])->name('deleted-product-item-file');

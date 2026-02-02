@@ -98,7 +98,7 @@
             <div class="card-header">
                 <div class="d-flex justify-content-between">
                     <h3 class="mb-1 text-white">Simulados</h3>
-                    <button class="btn btn-success" id="shepherd-example" onclick="startShepherdTour()"><i class="ri-graduation-cap-line"></i></button>
+                    {{-- <button class="btn btn-success" id="shepherd-example" onclick="startShepherdTour()"><i class="ri-graduation-cap-line"></i></button> --}}
                 </div>
                 <div class="d-flex align-items-center card-subtitle">
                     <div class="me-2 text-muted">Escolha o simulado que deseja realizar!</div>
