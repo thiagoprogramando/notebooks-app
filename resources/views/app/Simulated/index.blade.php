@@ -31,8 +31,6 @@
                                             <label for="title">Título</label>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="row">
                                     <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-2">
                                         <div class="form-floating form-floating-outline">
                                             <input type="date" name="date_start" id="date_start" class="form-control" placeholder="Data de início"/>
@@ -43,6 +41,12 @@
                                         <div class="form-floating form-floating-outline">
                                             <input type="date" name="date_end" id="date_end" class="form-control" placeholder="Data de término"/>
                                             <label for="date_end">Data de término</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-sm-12 col-md-12 col-lg-12 mb-2">
+                                        <div class="form-floating form-floating-outline mb-2">
+                                            <textarea class="form-control h-px-100" name="caption" id="caption" placeholder="Descrição"></textarea>
+                                            <label for="caption">Descrição</label>
                                         </div>
                                     </div>
                                     <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-2">
@@ -63,8 +67,6 @@
                                             <label for="value">Valor (Mín R$ 5,00)</label>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="row">
                                     <div class="col-12 text-center">
                                         <a class="me-1" data-bs-toggle="collapse" href="#collapseNotes" role="button" aria-expanded="false" aria-controls="collapseNotes"> Extras </a>
                                     </div>
@@ -72,7 +74,7 @@
                                         <div class="collapse" id="collapseNotes">
                                             <div class="form-floating form-floating-outline mb-2">
                                                 <div class="full-editor">
-                                                    <h6>Descrição</h6>
+                                                    <h6>Apresentação</h6>
                                                 </div>
                                                 <textarea name="description" id="description" hidden></textarea>
                                             </div>
@@ -115,6 +117,9 @@
                                 <img class="img-fluid" src="{{ $simulated->image ? asset('storage/'.$simulated->image) : asset('assets/img/illustrations/faq-illustration.png') }}" alt="Boy card image">
                             </div>
                             <h5 class="mb-1">{{ $simulated->title }}</h5>
+                            <p class="mb-6">
+                                {{ $simulated->caption }}
+                            </p>
                             <h4>
                                 <span class="badge bg-label-warning">
                                     R$ {{ number_format($simulated->value, 2, ',', '.') }}
@@ -145,7 +150,7 @@
                                 </div>
                             </div>
                             @if ($simulated->hasInvoice(Auth::id(), 1))
-                                <a href="{{ route('review-simulated', ['uuid' => $simulated->uuid]) }}" class="btn btn-primary w-100 mb-2">ACESSAR SIMULADO</a>
+                                <a href="{{ route('check-simulated', ['uuid' => $simulated->uuid]) }}" class="btn btn-primary w-100 mb-2">ACESSAR SIMULADO</a>
                             @elseif ($simulated->date_end < now())
                                 <button type="button" class="btn btn-dark w-100 mb-2">INDISPONÍVEL</button>
                             @else

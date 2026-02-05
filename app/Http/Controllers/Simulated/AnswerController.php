@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Simulated;
 
 use App\Http\Controllers\Controller;
+
 use App\Models\Question;
 use App\Models\Simulated;
 use App\Models\SimulatedQuestion;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -24,7 +26,7 @@ class AnswerController extends Controller {
         }
 
         if ($allQuestions->firstWhere('answer_result', 0) === null) {
-            return redirect()->route('simulated', ['uuid' => $simulated->uuid]);
+            return redirect()->route('review-simulated', ['uuid' => $simulated->uuid]);
         }
 
         $page = 1;

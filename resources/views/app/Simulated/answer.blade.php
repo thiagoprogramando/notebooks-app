@@ -11,16 +11,6 @@
 
             <div class="card-subtitle">
                  @foreach($questions as $question)
-
-                    <div class="d-flex justify-content-center">
-                        @if ($question->question_position == 1) 
-                            @if ($simulated->image)
-                                <img class="img-fluid w-25" width="" src="{{ asset('storage/'.$simulated->image) }}" alt="{{ $simulated->title }}">
-                            @endif
-                        @endif
-                    </div>
-                    {!! $simulated->description !!}
-
                     <div class="me-2">Questão {{ $question->question_position.' de '.$simulated->questions->count() }}</div>
                     <small>
                         <b>Banca:</b> {{ $question->question->board->code.' '.$question->question->board->name.' - '.$question->question->board->state .'/'.$question->question->board->city }} <br>

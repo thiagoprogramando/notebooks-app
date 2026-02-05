@@ -6,7 +6,7 @@
             <div class="card-header">
                 <h5 class="mb-1">Simulado: {{ $simulated->title }}</h5>
                 <div class="card-subtitle">
-                    <div class="me-2">Questões Resolvidas {{ $simulated->questions->whereNotNull('resolved_at')->count() }}</div>
+                    <div class="me-2">Questões Resolvidas {{ $simulated->questionsByUser(Auth::user()->id)->whereNotNull('resolved_at')->count() }}</div>
                     <small><b>{{ $simulated->countQuestionsByStatus(1) }}</b> Resolvidas</small> <small class="text-success"><b>{{ $simulated->countQuestionsByStatus(1, 1) }}</b> Acertos</small> <small class="text-danger"><b>{{ $simulated->countQuestionsByStatus(1, 2) }}</b> Erros</small>
                     <hr>
                 </div>
@@ -30,51 +30,49 @@
                         <div style="width: 250px; height: 250px; margin: 0 auto;">
                             <canvas id="generalChart"></canvas>
                         </div>
-                        @if ($simulated->date_end < now())
-                            <div class="text-center mt-5">
-                                <h5>Ranking</h5>
-                                <div class="alert alert-success" role="alert">
-                                    <a href="{{ route('simulated', ['uuid' => $simulated->uuid]) }}#{{ Auth::user()->uuid }}">Veja sua posição no ranking geral</a>
-                                </div>
+                        <div class="text-center mt-5">
+                            <h5>Ranking</h5>
+                            <div class="alert alert-success" role="alert">
+                                <a href="{{ route('simulated', ['uuid' => $simulated->uuid]) }}#{{ Auth::user()->uuid }}">Veja sua posição no ranking geral</a>
                             </div>
-                            <div class="table-responsive text-nowrap">
-                                <table class="table border-bottom">
-                                    <thead>
-                                        <tr>
-                                            <th class="bg-transparent border-bottom text-center">POSIÇÃO</th>
-                                            <th class="bg-transparent border-bottom">CANDIDATO</th>
-                                            <th class="bg-transparent border-bottom text-center">PONTUAÇÃO</th>
+                        </div>
+                        <div class="table-responsive text-nowrap">
+                            <table class="table border-bottom">
+                                <thead>
+                                    <tr>
+                                        <th class="bg-transparent border-bottom text-center">POSIÇÃO</th>
+                                        <th class="bg-transparent border-bottom">CANDIDATO</th>
+                                        <th class="bg-transparent border-bottom text-center">PONTUAÇÃO</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="table-border-bottom-0">
+                                    @foreach ($ranking as $position)
+                                        <tr id="{{ $position->user->uuid }}">
+                                            <td class="text-center">
+                                                {{ $position->position }}
+                                            </td>
+                                            <td>
+                                                @if (Auth::user()->id == $position->user->id)
+                                                    {{ $position->user->name }} @isset($position->user->address_state) / {{ $position->user->address_state }} @endisset
+                                                @else
+                                                    @php
+                                                        $name       = $position->user->name;
+                                                        $nameParts  = explode(' ', $name);
+                                                        $firstName  = $nameParts[0] ?? '';
+                                                        $lastName   = $nameParts[count($nameParts) - 1] ?? '';
+                                                        $maskedName = mb_substr($firstName, 0, 2) . '***' . mb_substr($lastName, -2);
+                                                    @endphp
+                                                    {{ $maskedName }} @isset($position->user->address_state) / {{ $position->user->address_state }} @endisset
+                                                @endif
+                                            </td>
+                                            <td class="text-success fw-medium text-center">
+                                                {{ $position->total_points }}
+                                            </td>
                                         </tr>
-                                    </thead>
-                                    <tbody class="table-border-bottom-0">
-                                        @foreach ($ranking as $position)
-                                            <tr id="{{ $position->user->uuid }}">
-                                                <td class="text-center">
-                                                    {{ $position->position }}
-                                                </td>
-                                                <td>
-                                                    @if (Auth::user()->id == $position->user->id)
-                                                        {{ $position->user->name }} @isset($position->user->address_state) / {{ $position->user->address_state }} @endisset
-                                                    @else
-                                                        @php
-                                                            $name       = $position->user->name;
-                                                            $nameParts  = explode(' ', $name);
-                                                            $firstName  = $nameParts[0] ?? '';
-                                                            $lastName   = $nameParts[count($nameParts) - 1] ?? '';
-                                                            $maskedName = mb_substr($firstName, 0, 2) . '***' . mb_substr($lastName, -2);
-                                                        @endphp
-                                                        {{ $maskedName }} @isset($position->user->address_state) / {{ $position->user->address_state }} @endisset
-                                                    @endif
-                                                </td>
-                                                <td class="text-success fw-medium text-center">
-                                                    {{ $position->total_points }}
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                        @endif
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
 
                     <div class="col-12 col-sm-12 col-md-7 col-lg-7">

@@ -55,6 +55,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/simulateds', [SimulatedController::class, 'index'])->name('simulateds');
     Route::get('/simulated/{uuid}', [SimulatedController::class, 'show'])->name('simulated');
+    Route::get('/check-simulated/{uuid}', [SimulatedController::class, 'check'])->name('check-simulated');
     Route::get('/review-simulated/{uuid}', [SimulatedController::class, 'review'])->name('review-simulated');
     Route::get('/answer-simulated/{uuid}', [SimulatedAnswerController::class, 'show'])->name('answer-simulated');
     Route::post('answer-simulated-question', [SimulatedAnswerController::class, 'update'])->name('answer-simulated-question');

@@ -31,6 +31,18 @@ class SimulatedController extends Controller {
         ]);
     }
 
+    public function check($uuid) {
+        
+        $simulated = Simulated::where('uuid', $uuid)->first();
+        if (!$simulated) {
+            return redirect()->back()->with('infor', 'Simulado não encontrado!');
+        }
+
+        return view('app.Simulated.check', [
+            'simulated' => $simulated
+        ]);
+    }
+
     public function review ($uuid) {
 
         $simulated = Simulated::where('uuid', $uuid)->first();
@@ -136,6 +148,7 @@ class SimulatedController extends Controller {
         $simulated->title       = $request->title;
         $simulated->value       = $this->formatValue($request->value);
         $simulated->description = $request->description;
+        $simulated->caption     = $request->caption;
         $simulated->date_start  = $request->date_start;
         $simulated->date_end    = $request->date_end;
         $simulated->status      = $request->status;
@@ -166,6 +179,9 @@ class SimulatedController extends Controller {
         }
         if ($request->filled('description')) {
             $simulated->description = $request->description;
+        }
+        if ($request->filled('caption')) {
+            $simulated->caption = $request->caption;
         }
         if ($request->filled('date_start')) {
             $simulated->date_start = $request->date_start;

@@ -32,6 +32,10 @@ class Simulated extends Model {
         return $this->hasMany(Question::class);
     }
 
+    public function questionsByUser($user) {
+        return $this->hasMany(SimulatedQuestion::class)->where('user_id', $user);
+    }
+
     public function simulatedAnswers() {
         return $this->hasMany(SimulatedQuestion::class);
     }

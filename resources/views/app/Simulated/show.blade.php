@@ -38,6 +38,12 @@
                                     <label for="date_end">Data de término</label>
                                 </div>
                             </div>
+                            <div class="col-12 col-sm-12 col-md-12 col-lg-12 mb-2">
+                                <div class="form-floating form-floating-outline mb-2">
+                                    <textarea class="form-control h-px-100" name="caption" id="caption" placeholder="Descrição">{{ $simulated->caption }}</textarea>
+                                    <label for="caption">Descrição</label>
+                                </div>
+                            </div>
                             <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-2">
                                 <div class="form-floating form-floating-outline">
                                     <div class="select2-primary">
