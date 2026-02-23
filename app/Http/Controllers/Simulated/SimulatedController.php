@@ -31,15 +31,20 @@ class SimulatedController extends Controller {
         ]);
     }
 
-    public function check($uuid) {
+    public function view ($uuid, $mode = null) {
         
         $simulated = Simulated::where('uuid', $uuid)->first();
         if (!$simulated) {
             return redirect()->back()->with('infor', 'Simulado não encontrado!');
         }
 
-        return view('app.Simulated.check', [
-            'simulated' => $simulated
+        if ($simulated->status == 'completed') {
+             return redirect()->route('answer-simulated', ['uuid' => $simulated->uuid]);
+        }
+
+        return view('app.Simulated.Resolution.view', [
+            'simulated' => $simulated,
+            'mode'      => $mode == 'roles' ? 'roles' :'presentation'
         ]);
     }
 
@@ -50,7 +55,7 @@ class SimulatedController extends Controller {
             return redirect()->back()->with('infor', 'Simulado não encontrado!');
         }
 
-        if ($simulated->simulatedAnswers()->where('user_id', Auth::user()->id)->where('answer_result', 0)->count() > 0 && $simulated->date_end > now()) {
+        if ($simulated->simulatedAnswers()->where('user_id', Auth::user()->id)->whereIn('answer_result', [0, 3])->exists() && $simulated->date_end > now()) {
             return redirect()->route('answer-simulated', ['uuid' => $simulated->uuid]);
         }
 
@@ -87,7 +92,7 @@ class SimulatedController extends Controller {
                     return $item;
                 });
 
-        return view('app.Simulated.review', [
+        return view('app.Simulated.Resolution.review', [
             'simulated' => $simulated,
             'charts'    => $charts,
             'ranking'   => $ranking,
@@ -143,15 +148,16 @@ class SimulatedController extends Controller {
 
     public function store (Request $request) {
 
-        $simulated              = new Simulated();
-        $simulated->uuid        = Str::uuid();
-        $simulated->title       = $request->title;
-        $simulated->value       = $this->formatValue($request->value);
-        $simulated->description = $request->description;
-        $simulated->caption     = $request->caption;
-        $simulated->date_start  = $request->date_start;
-        $simulated->date_end    = $request->date_end;
-        $simulated->status      = $request->status;
+        $simulated                  = new Simulated();
+        $simulated->uuid            = Str::uuid();
+        $simulated->title           = $request->title;
+        $simulated->value           = $this->formatValue($request->value);
+        $simulated->presentation    = $request->presentation;
+        $simulated->roles           = $request->roles;
+        $simulated->caption         = $request->caption;
+        $simulated->date_start      = $request->date_start;
+        $simulated->date_end        = $request->date_end;
+        $simulated->status          = $request->status;
 
         if ($request->hasFile('cover_image')) {
             $simulated->image = $request->file('cover_image')->store('simulateds', 'public');
@@ -177,8 +183,11 @@ class SimulatedController extends Controller {
         if ($request->filled('value')) {
             $simulated->value = $this->formatValue($request->value);
         }
-        if ($request->filled('description')) {
-            $simulated->description = $request->description;
+        if ($request->filled('presentation')) {
+            $simulated->presentation = $request->presentation;
+        }
+        if ($request->filled('roles')) {
+            $simulated->roles = $request->roles;
         }
         if ($request->filled('caption')) {
             $simulated->caption = $request->caption;

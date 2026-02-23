@@ -65,9 +65,15 @@
                             <div class="col-12">
                                 <div class="form-floating form-floating-outline mb-2">
                                     <div class="full-editor">
-                                        {!! $simulated->description !!}
+                                        {!! $simulated->presentation !!}
                                     </div>
-                                    <textarea name="description" id="description" hidden></textarea>
+                                    <textarea name="presentation" id="presentation" hidden></textarea>
+                                </div>
+                                <div class="form-floating form-floating-outline mb-2">
+                                    <div class="editor">
+                                        {!! $simulated->roles !!}
+                                    </div>
+                                    <textarea name="roles" id="roles" hidden></textarea>
                                 </div>
                                 <div class="mb-4">
                                     <label for="cover_image" class="form-label">Imagem de Capa</label>
@@ -266,7 +272,17 @@
 
             window.editor = new Quill('.full-editor', {
                 bounds: '.full-editor',
-                placeholder: 'Digite a descrição...',
+                placeholder: 'Digite...',
+                modules: {
+                formula: true,
+                toolbar: fullToolbar
+                },
+                theme: 'snow'
+            });
+
+            window.editorRoles = new Quill('.editor', {
+                bounds: '.editor',
+                placeholder: 'Digite...',
                 modules: {
                 formula: true,
                 toolbar: fullToolbar
@@ -276,7 +292,8 @@
         });
 
         document.getElementById('form').addEventListener('submit', function (e) {
-            document.getElementById('description').value = window.editor.root.innerHTML.trim();
+            document.getElementById('presentation').value = window.editor.root.innerHTML.trim();
+            document.getElementById('roles').value = window.editorRoles.root.innerHTML.trim();
         });
     </script>
 @endsection

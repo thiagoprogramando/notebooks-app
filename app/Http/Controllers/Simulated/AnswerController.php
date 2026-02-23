@@ -25,7 +25,7 @@ class AnswerController extends Controller {
             return redirect()->back()->with('info', 'Nenhuma questão foi gerada para este simulado!');
         }
 
-        if ($allQuestions->firstWhere('answer_result', 0) === null) {
+        if ($allQuestions->firstWhere('answer_result', 0) === null && $allQuestions->firstWhere('answer_result', 3) === null) {
             return redirect()->route('review-simulated', ['uuid' => $simulated->uuid]);
         }
 
@@ -35,16 +35,20 @@ class AnswerController extends Controller {
         } else {
             
             $nextPending = $allQuestions->firstWhere('answer_result', 0);
+            if (!$nextPending) {
+                $nextPending = $allQuestions->firstWhere('answer_result', 3);
+            }
+
             if ($nextPending) {
-                $index = $allQuestions->search(fn($q) => $q->id === $nextPending->id);
-                $page = $index + 1;
+                $index  = $allQuestions->search(fn($q) => $q->id === $nextPending->id);
+                $page   = $index + 1;
             }
         }
 
         $questions = SimulatedQuestion::where('user_id', Auth::user()->id)->where('simulated_id', $simulated->id)->orderBy('question_position')->paginate(1, ['*'], 'page', $page);
         session(['answer' => true]);
 
-        return view('app.Simulated.answer', [
+        return view('app.Simulated.Resolution.answer', [
             'simulated' => $simulated,
             'questions' => $questions,
         ]);
@@ -60,6 +64,17 @@ class AnswerController extends Controller {
         $question = Question::find($simulatedQuestion->question_id);
         if (!$question) {
             return redirect()->back()->with('infor', 'Questão não encontrada!');
+        }
+
+        if ($request->answer_result == 3) {
+            $simulatedQuestion->answer_result   = 3;
+            $simulatedQuestion->resolved_at     = now();
+            $simulatedQuestion->answer_id       = null;
+            if ($simulatedQuestion->save()) {
+                return redirect()->route('answer-simulated', ['uuid' => $simulatedQuestion->simulated->uuid])->with('success', 'Resposta salva com sucesso!');
+            }
+
+            return redirect()->back()->with('infor', 'Erro ao salvar a resposta. Tente novamente!');
         }
 
         $answer_id = $request->input('answer_id');

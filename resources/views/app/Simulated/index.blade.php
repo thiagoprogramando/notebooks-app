@@ -76,7 +76,13 @@
                                                 <div class="full-editor">
                                                     <h6>Apresentação</h6>
                                                 </div>
-                                                <textarea name="description" id="description" hidden></textarea>
+                                                <textarea name="presentation" id="presentation" hidden></textarea>
+                                            </div>
+                                            <div class="form-floating form-floating-outline mb-2">
+                                                <div class="editor">
+                                                    <h6>Orientações</h6>
+                                                </div>
+                                                <textarea name="roles" id="roles" hidden></textarea>
                                             </div>
                                             <div class="mb-4">
                                                 <label for="cover_image" class="form-label">Imagem de Capa</label>
@@ -150,7 +156,7 @@
                                 </div>
                             </div>
                             @if ($simulated->hasInvoice(Auth::id(), 1))
-                                <a href="{{ route('check-simulated', ['uuid' => $simulated->uuid]) }}" class="btn btn-primary w-100 mb-2">ACESSAR SIMULADO</a>
+                                <a href="{{ route('view-simulated', ['uuid' => $simulated->uuid]) }}" class="btn btn-primary w-100 mb-2">ACESSAR SIMULADO</a>
                             @elseif ($simulated->date_end < now())
                                 <button type="button" class="btn btn-dark w-100 mb-2">INDISPONÍVEL</button>
                             @else
@@ -284,7 +290,17 @@
 
             window.editor = new Quill('.full-editor', {
                 bounds: '.full-editor',
-                placeholder: 'Digite a descrição...',
+                placeholder: 'Digite...',
+                modules: {
+                formula: true,
+                toolbar: fullToolbar
+                },
+                theme: 'snow'
+            });
+
+            window.editorRoles = new Quill('.editor', {
+                bounds: '.editor',
+                placeholder: 'Digite...',
                 modules: {
                 formula: true,
                 toolbar: fullToolbar
@@ -294,7 +310,8 @@
         });
 
         document.getElementById('form').addEventListener('submit', function (e) {
-            document.getElementById('description').value = window.editor.root.innerHTML.trim();
+            document.getElementById('presentation').value = window.editor.root.innerHTML.trim();
+            document.getElementById('roles').value = window.editorRoles.root.innerHTML.trim();
         });
     </script>
 @endsection

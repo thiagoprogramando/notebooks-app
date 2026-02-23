@@ -14,7 +14,8 @@ return new class extends Migration {
             $table->string('image')->nullable();
             $table->string('title');
             $table->string('caption')->nullable();
-            $table->text('description')->nullable();
+            $table->text('roles')->nullable();
+            $table->text('presentation')->nullable();
             $table->decimal('value', 8, 2)->default(0);
             $table->date('date_start');
             $table->date('date_end');

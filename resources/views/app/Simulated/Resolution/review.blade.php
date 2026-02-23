@@ -33,7 +33,7 @@
                         <div class="text-center mt-5">
                             <h5>Ranking</h5>
                             <div class="alert alert-success" role="alert">
-                                <a href="{{ route('simulated', ['uuid' => $simulated->uuid]) }}#{{ Auth::user()->uuid }}">Veja sua posição no ranking geral</a>
+                                <a href="#{{ Auth::user()->uuid }}">Veja sua posição no ranking geral</a>
                             </div>
                         </div>
                         <div class="table-responsive text-nowrap">
@@ -76,6 +76,11 @@
                     </div>
 
                     <div class="col-12 col-sm-12 col-md-7 col-lg-7">
+
+                        <div class="btn-group d-flex justify-content-center">
+                            <a href="{{ route('sumary-simulated', ['simulated' => $simulated->uuid]) }}" class="btn btn-outline-dark">REVISAR SIMULADO RESOLVIDO</a> 
+                        </div>
+
                         <div class="table-responsive text-nowrap">
                             <table class="table border-bottom">
                                 <thead>

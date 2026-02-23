@@ -32,9 +32,7 @@
                     @csrf
                     @foreach($questions as $question)
                         <div class="col-12 col-sm-12 col-md-12 col-lg-12 bg-light p-3 rounded mt-1 mb-1">
-                            <h5>
-                                #{{ $question->question->id }} - {!! $question->question->title !!}
-                            </h5>
+                            <h5> {!! $question->question->title !!} </h5>
                         </div>
 
                         <div class="col-12 col-sm-12 col-md-12 col-lg-12 bg-light p-3 rounded mt-2 mb-2">
@@ -65,13 +63,31 @@
 </div>
 
 <script>
-    function submitAnswer() {
+    function submitAnswer () {
         const form = document.getElementById('answerForm');
         form.action = "{{ route('answer-simulated-question') }}";
         form.submit();
     }
 
-    function submitDelete() {
+    function submitEmpty() {
+        fetch("{{ route('answer-simulated-question') }}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify({
+                answer_result: 3,
+                simulated_question_id: {{ $question->id }}
+            })
+        }).then(res => {
+            if (res.ok) {
+                window.location.reload(); // ou redirecionar
+            }
+        });
+    }
+
+    function submitDelete () {
         const questionId = document.querySelector('[name="notebook_question_id"]')?.value;
         console.log(questionId);
         if (!questionId) {
