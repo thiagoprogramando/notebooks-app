@@ -50,6 +50,10 @@ class Simulated extends Model {
             ->exists();
     }
 
+    public function paidUsers() {
+        return $this->hasManyThrough(User::class, Invoice::class, 'simulated_id', 'id', 'id', 'user_id')->where('payment_status', 'paid');
+    }
+
     public function countQuestionsByStatus(int $status, ?int $result = null): int {
         
         $query = $this->simulatedAnswers();

@@ -10,6 +10,7 @@ use App\Models\SimulatedQuestion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 class SimulatedController extends Controller {
@@ -39,7 +40,15 @@ class SimulatedController extends Controller {
         }
 
         if ($simulated->status == 'completed') {
-             return redirect()->route('answer-simulated', ['uuid' => $simulated->uuid]);
+            return redirect()->route('answer-simulated', ['uuid' => $simulated->uuid]);
+        }
+
+        if ($simulated->date_start > now()) {
+            return redirect()->back()->with('infor', 'Aguarde período de abertura do Simulado!');
+        }
+
+        if ($simulated->date_end < now()) {
+            return redirect()->route('answer-simulated', ['uuid' => $simulated->uuid]);
         }
 
         return view('app.Simulated.Resolution.view', [
@@ -278,6 +287,48 @@ class SimulatedController extends Controller {
         }
 
         return redirect()->back()->with('error', 'Módulo indisponível!');
+    }
+
+    public function generateSimulatedForUser(Request $request) {
+
+        if (Hash::check($request->password, Auth::user()->password)) {
+
+            $simulated = Simulated::where('uuid', $request->uuid)->first();
+            if (!$simulated) {
+                return redirect()->back()->with('error', 'Simulado não encontrado!');
+            }
+
+            $questions = $simulated->questions()->orderBy('simulated_question_position')->get();
+            if ($questions->isEmpty()) {
+                return redirect()->back()->with('error', 'Não há questões associadas ao Simulado!');
+            }
+
+            $users = Invoice::where('simulated_id', $simulated->id)->where('payment_status', '1')->pluck('user_id');
+            foreach ($users as $userId) {
+
+                $existingQuestionIds    = SimulatedQuestion::where('user_id', $userId)->where('simulated_id', $simulated->id)->pluck('question_id')->toArray();
+                $position               = SimulatedQuestion::where('user_id', $userId)->where('simulated_id', $simulated->id)->max('question_position') ?? 0;
+
+                foreach ($questions as $q) {
+
+                    if (in_array($q->id, $existingQuestionIds)) {
+                        continue;
+                    }
+
+                    SimulatedQuestion::create([
+                        'user_id'           => $userId,
+                        'simulated_id'      => $simulated->id,
+                        'question_id'       => $q->id,
+                        'question_position' => ++$position,
+                        'answer_result'     => 0,
+                    ]);
+                }
+            }
+
+            return redirect()->back()->with('success', 'Questões geradas para os usuários compradores!');
+        }
+
+        return redirect()->back()->with('error', 'Autenticação falhou, verifique os dados e tente novamente!');
     }
 
     private function formatValue ($valor) {

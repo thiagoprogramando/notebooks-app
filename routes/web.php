@@ -134,6 +134,7 @@ Route::middleware(['auth'])->group(function () {
 
         Route::post('/created-simulated', [SimulatedController::class, 'store'])->name('created-simulated');
         Route::post('/updated-simulated/{uuid}', [SimulatedController::class, 'update'])->name('updated-simulated');
+        Route::post('/genereted-questions-simulated', [SimulatedController::class, 'generateSimulatedForUser'])->name('genereted-questions-simulated');
     });
 
     Route::get('/logout', [LoginController::class, 'logout'])->name('logout');

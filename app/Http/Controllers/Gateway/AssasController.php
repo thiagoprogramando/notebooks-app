@@ -116,9 +116,9 @@ class AssasController extends Controller {
             $invoice = Invoice::where('payment_token', $token)->whereIn('payment_status', [0, 2])->first();
             if ($invoice) {
 
-                if ($invoice->simulated_id) {
-                    $this->generateSimulatedForUser($invoice->user, $invoice->simulated);
-                }
+                // if ($invoice->simulated_id) {
+                //     $this->generateSimulatedForUser($invoice->user, $invoice->simulated);
+                // }
 
                 $invoice->payment_status = 1;
                 if ($invoice->save()) {

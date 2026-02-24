@@ -130,9 +130,12 @@
 
                     <div class="col-12 col-sm-12 col-md-7 col-lg-7">
 
-                        <div class="bnt-group">
+                        <form action="{{ route('genereted-questions-simulated') }}" method="POST" class="bnt-group confirm">
+                            @csrf
+                            <input type="hidden" name="uuid" value="{{ $simulated->uuid }}">
                             <a href="{{ route('create-question', ['topic_id' => null, 'simulated' => $simulated->id]) }}" target="_blank" class="btn btn-outline-dark mb-3"><i class="ri-add-line"></i> Adicionar Questão</a>
-                        </div>
+                            <button type="submit" class="btn btn-outline-dark mb-3"><i class="ri-lock-unlock-line"></i> Liberar Questões</button>
+                        </form>
                         
                         <div class="table-responsive text-nowrap">
                             <table class="table border-bottom">
