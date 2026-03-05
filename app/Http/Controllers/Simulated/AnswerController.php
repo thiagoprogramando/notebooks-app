@@ -17,15 +17,15 @@ class AnswerController extends Controller {
         
         $simulated = Simulated::where('uuid', $uuid)->first();
         if (!$simulated) {
-            return redirect()->back()->with('info', 'Simulado não encontrado!');
+            return redirect()->back()->with('infor', 'Simulado não encontrado!');
         }
 
         $allQuestions = SimulatedQuestion::where('user_id', Auth::user()->id)->where('simulated_id', $simulated->id)->orderBy('question_position')->get();
         if ($allQuestions->isEmpty()) {
-            return redirect()->back()->with('info', 'Nenhuma questão foi gerada para este simulado!');
+            return redirect()->back()->with('infor', 'Simulado não disponível! contate o suporte ou aguarde liberação.');
         }
 
-        if ($allQuestions->firstWhere('answer_result', 0) === null && $allQuestions->firstWhere('answer_result', 3) === null) {
+        if (($allQuestions->firstWhere('answer_result', 0) === null && $allQuestions->firstWhere('answer_result', 3) === null) || $simulated->date_end < now()) {
             return redirect()->route('review-simulated', ['uuid' => $simulated->uuid]);
         }
 
