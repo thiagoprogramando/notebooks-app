@@ -63,10 +63,45 @@
 </div>
 
 <script>
-    function submitAnswer () {
+    function submitAnswer() {
+
         const form = document.getElementById('answerForm');
-        form.action = "{{ route('answer-simulated-question') }}";
-        form.submit();
+        const formData = new FormData(form);
+
+        fetch("{{ route('answer-simulated-question') }}", {
+            method: "POST",
+            headers: {
+                "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+
+            if (data.success) {
+
+                window.location.href = data.redirect;
+
+            } else {
+
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Atenção',
+                    text: data.message
+                });
+
+            }
+
+        })
+        .catch(() => {
+
+            Swal.fire({
+                icon: 'error',
+                title: 'Erro',
+                text: 'Falha na comunicação com o servidor.'
+            });
+
+        });
     }
 
     function submitPrevious() {
