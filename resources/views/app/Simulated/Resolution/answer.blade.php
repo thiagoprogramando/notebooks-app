@@ -69,6 +69,18 @@
         form.submit();
     }
 
+    function submitPrevious() {
+        const currentPage   = {{ $currentPage }};
+        const prevPage      = currentPage - 1;
+
+        if (prevPage < 1) return;
+
+        const url = new URL(window.location.href);
+        url.searchParams.set('page', prevPage);
+
+        window.location.href = url.toString();
+    }
+
     function submitEmpty() {
         fetch("{{ route('answer-simulated-question') }}", {
             method: "POST",
@@ -78,12 +90,28 @@
             },
             body: JSON.stringify({
                 answer_result: 3,
-                simulated_question_id: {{ $question->id }}
+                simulated_question_id: {{ $question->id }},
+                next: 1
             })
-        }).then(res => {
-            if (res.ok) {
-                window.location.reload(); // ou redirecionar
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = data.redirect;
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erro',
+                    text: data.message
+                });
             }
+        })
+        .catch(() => {
+            Swal.fire({
+                icon: 'error',
+                title: 'Erro',
+                text: 'Falha na comunicação com o servidor.'
+            });
         });
     }
 

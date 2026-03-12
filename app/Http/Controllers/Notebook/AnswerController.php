@@ -11,17 +11,18 @@ use Illuminate\Support\Facades\Auth;
 
 class AnswerController extends Controller {
     
-    public function index($notebookId, $questionId = null) {
+    public function index(Request $request, $notebookId, $questionId = null) {
 
         $notebook = Notebook::find($notebookId);
         if (!$notebook) {
             return redirect()->route('notebooks')->with('infor', 'Caderno não encontrado!');
         }
 
+        $page = $request->has('page') ? (int) $request->page : 1;
         if ($questionId) {
-            $notebookQuestions = NotebookQuestion::where('notebook_id', $notebookId)->where('question_id', $questionId)->paginate(1);
+            $notebookQuestions = NotebookQuestion::where('notebook_id', $notebookId)->where('question_id', $questionId)->paginate(1, ['*'], 'page', $page);
         } else {
-            $notebookQuestions = NotebookQuestion::where('notebook_id', $notebookId)->where('answer_result', 0)->orderBy('question_position')->paginate(1);
+            $notebookQuestions = NotebookQuestion::where('notebook_id', $notebookId)->where('answer_result', 0)->orderBy('question_position')->paginate(1, ['*'], 'page', $page);
         }
 
         session(['answer' => true]);
@@ -31,8 +32,9 @@ class AnswerController extends Controller {
         }
 
         return view('app.Notebook.answer', [
-            'notebook'  => $notebook,
-            'questions' => $notebookQuestions,
+            'notebook'      => $notebook,
+            'questions'     => $notebookQuestions,
+            'currentPage'   => $page
         ]);
     }
 
@@ -40,29 +42,72 @@ class AnswerController extends Controller {
 
         $notebookQuestion = NotebookQuestion::find($request->notebook_question_id);
         if (!$notebookQuestion) {
-            return redirect()->back()->with('infor', 'Questão não encontrada!');
+            return response()->json([
+                'success' => false,
+                'message' => 'Questão não encontrada!'
+            ], 404);
         }
 
         $question = Question::find($notebookQuestion->question_id);
         if (!$question) {
-            return redirect()->back()->with('infor', 'Questão não encontrada!');
+            return response()->json([
+                'success' => false,
+                'message' => 'Questão não encontrada!'
+            ], 404);
         }
+
+        if ($request->answer_result == 3) {
+
+            $notebookQuestion->answer_result = 3;
+            $notebookQuestion->answer_id = null;
+            $notebookQuestion->resolved_at = now();
+
+            if ($notebookQuestion->save()) {
+                return response()->json([
+                    'success' => true,
+                    'redirect' => route('answer', [
+                        'notebook' => $notebookQuestion->notebook_id
+                    ])
+                ]);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erro ao pular questão.'
+            ]);
+        }
+
 
         $answer_id = $request->input('answer_id');
         if (!$answer_id) {
-            return redirect()->back()->with('infor', 'Você precisa selecionar uma alternativa.');
+            return response()->json([
+                'success' => false,
+                'message' => 'Você precisa selecionar uma alternativa.'
+            ]);
         }
-        
-        $isCorrect = $question->alternatives()->where('id', $answer_id)->where('is_correct', true)->exists();
 
-        $notebookQuestion->answer_id        = $answer_id;
-        $notebookQuestion->answer_result    = $isCorrect ? 1 : 2;
-        $notebookQuestion->resolved_at      = now();
+        $isCorrect = $question->alternatives()
+            ->where('id', $answer_id)
+            ->where('is_correct', true)
+            ->exists();
+
+        $notebookQuestion->answer_id = $answer_id;
+        $notebookQuestion->answer_result = $isCorrect ? 1 : 2;
+        $notebookQuestion->resolved_at = now();
+
         if ($notebookQuestion->save()) {
-            return redirect()->route('review-question', ['question' => $notebookQuestion->id]);
+            return response()->json([
+                'success' => true,
+                'redirect' => route('review-question', [
+                    'question' => $notebookQuestion->id
+                ])
+            ]);
         }
 
-        return redirect()->back()->with('infor', 'Erro ao salvar a resposta. Tente novamente!');
+        return response()->json([
+            'success' => false,
+            'message' => 'Erro ao salvar a resposta.'
+        ]);
     }
 
     public function destroy($id) {

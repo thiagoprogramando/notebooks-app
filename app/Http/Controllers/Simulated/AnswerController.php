@@ -13,14 +13,14 @@ use Illuminate\Support\Facades\Auth;
 
 class AnswerController extends Controller {
 
-    public function show ($uuid, Request $request) {
-        
+    public function show(Request $request, $uuid) {
+
         $simulated = Simulated::where('uuid', $uuid)->first();
         if (!$simulated) {
             return redirect()->back()->with('infor', 'Simulado não encontrado!');
         }
 
-        $allQuestions = SimulatedQuestion::where('user_id', Auth::user()->id)->where('simulated_id', $simulated->id)->orderBy('question_position')->get();
+        $allQuestions = SimulatedQuestion::where('user_id', Auth::id())->where('simulated_id', $simulated->id)->orderBy('question_position')->get();
         if ($allQuestions->isEmpty()) {
             return redirect()->back()->with('infor', 'Simulado não disponível! contate o suporte ou aguarde liberação.');
         }
@@ -29,28 +29,26 @@ class AnswerController extends Controller {
             return redirect()->route('review-simulated', ['uuid' => $simulated->uuid]);
         }
 
-        $page = 1;
         if ($request->has('page')) {
-            $page = (int) $request->page;
+            $page = max(1, (int) $request->page);
         } else {
-            
-            $nextPending = $allQuestions->firstWhere('answer_result', 0);
-            if (!$nextPending) {
-                $nextPending = $allQuestions->firstWhere('answer_result', 3);
-            }
 
+            $nextPending = $allQuestions->firstWhere('answer_result', 0) ?? $allQuestions->firstWhere('answer_result', 3);
             if ($nextPending) {
-                $index  = $allQuestions->search(fn($q) => $q->id === $nextPending->id);
-                $page   = $index + 1;
+                $index = $allQuestions->search(fn($q) => $q->id === $nextPending->id);
+                $page = $index + 1;
+            } else {
+                $page = 1;
             }
         }
 
-        $questions = SimulatedQuestion::where('user_id', Auth::user()->id)->where('simulated_id', $simulated->id)->orderBy('question_position')->paginate(1, ['*'], 'page', $page);
+        $questions = SimulatedQuestion::where('user_id', Auth::id())->where('simulated_id', $simulated->id)->orderBy('question_position')->paginate(1, ['*'], 'page', $page);
         session(['answer' => true]);
 
         return view('app.Simulated.Resolution.answer', [
             'simulated' => $simulated,
             'questions' => $questions,
+            'currentPage' => $page,
         ]);
     }
 
@@ -58,12 +56,18 @@ class AnswerController extends Controller {
 
         $simulatedQuestion = SimulatedQuestion::find($request->simulated_question_id);
         if (!$simulatedQuestion) {
-            return redirect()->back()->with('infor', 'Questão não encontrada!');
+            return response()->json([
+                'success' => false,
+                'message' => 'Questão não encontrada/indisponível!'
+            ]);
         }
 
         $question = Question::find($simulatedQuestion->question_id);
         if (!$question) {
-            return redirect()->back()->with('infor', 'Questão não encontrada!');
+            return response()->json([
+                'success' => false,
+                'message' => 'Questão não encontrada/indisponível!'
+            ]);
         }
 
         if ($request->answer_result == 3) {
@@ -71,15 +75,27 @@ class AnswerController extends Controller {
             $simulatedQuestion->resolved_at     = now();
             $simulatedQuestion->answer_id       = null;
             if ($simulatedQuestion->save()) {
-                return redirect()->route('answer-simulated', ['uuid' => $simulatedQuestion->simulated->uuid])->with('success', 'Resposta salva com sucesso!');
+                return response()->json([
+                    'success' => true,
+                    'redirect' => route('answer-simulated', [
+                        'uuid' => $simulatedQuestion->simulated->uuid,
+                        'next' => 1
+                    ])
+                ]);
             }
 
-            return redirect()->back()->with('infor', 'Erro ao salvar a resposta. Tente novamente!');
+            return response()->json([
+                    'success' => false,
+                    'message' => 'Erro ao salvar a resposta.'
+                ]);
         }
 
         $answer_id = $request->input('answer_id');
         if (!$answer_id) {
-            return redirect()->back()->with('infor', 'Você precisa selecionar uma alternativa.');
+            return response()->json([
+                'success' => false,
+                'message' => 'Você precisa selecionar uma alternativa.'
+            ]);
         }
         
         $isCorrect                          = $question->alternatives()->where('id', $answer_id)->where('is_correct', true)->exists();
@@ -87,9 +103,17 @@ class AnswerController extends Controller {
         $simulatedQuestion->answer_result   = $isCorrect ? 1 : 2;
         $simulatedQuestion->resolved_at     = now();
         if ($simulatedQuestion->save()) {
-            return redirect()->route('answer-simulated', ['uuid' => $simulatedQuestion->simulated->uuid])->with('success', 'Resposta salva com sucesso!');
+            return response()->json([
+                'success' => true,
+                'redirect' => route('answer-simulated', [
+                    'uuid' => $simulatedQuestion->simulated->uuid
+                ])
+            ]);
         }
 
-        return redirect()->back()->with('infor', 'Erro ao salvar a resposta. Tente novamente!');
+        return response()->json([
+            'success' => false,
+            'message' => 'Erro ao salvar a resposta.'
+        ]);
     }
 }

@@ -179,14 +179,95 @@
     <script src="{{ asset('assets/vendor/libs/quill/quill.js') }}"></script>
     <script>
         function submitAnswer() {
+
             const form = document.getElementById('answerForm');
-            form.action = "{{ route('answer-question') }}";
-            form.submit();
+            const formData = new FormData(form);
+
+            fetch("{{ route('answer-question') }}", {
+                method: "POST",
+                headers: {
+                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+
+                if (data.success) {
+
+                    window.location.href = data.redirect;
+
+                } else {
+
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Atenção',
+                        text: data.message
+                    });
+
+                }
+
+            })
+            .catch(() => {
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erro',
+                    text: 'Falha na comunicação com o servidor.'
+                });
+
+            });
+
+        }
+
+        function submitPrevious() {
+            const currentPage   = {{ $currentPage }};
+            const prevPage      = currentPage - 1;
+
+            if (prevPage < 1) return;
+
+            const url = new URL(window.location.href);
+            url.searchParams.set('page', prevPage);
+
+            window.location.href = url.toString();
+        }
+
+        function submitEmpty() {
+            fetch("{{ route('answer-question') }}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify({
+                    answer_result: 3,
+                    notebook_question_id: document.querySelector('[name="notebook_question_id"]')?.value,
+                    next: 1
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = data.redirect;
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Erro',
+                        text: data.message
+                    });
+                }
+            })
+            .catch(() => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erro',
+                    text: 'Falha na comunicação com o servidor.'
+                });
+            });
         }
 
         function submitDelete() {
             const questionId = document.querySelector('[name="notebook_question_id"]')?.value;
-            console.log(questionId);
             if (!questionId) {
                 return;
             }

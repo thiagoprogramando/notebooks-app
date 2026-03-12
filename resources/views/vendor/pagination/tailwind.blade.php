@@ -3,7 +3,7 @@
     <div class="flex justify-between flex-1 sm:hidden">
         @if (session('answer'))
             @if ($paginator->previousPageUrl())
-                <button type="button" onclick="window.location.href='{{ $paginator->previousPageUrl() }}'" class="relative inline-flex items-center px-4 py-2 text-sm font-medium bg-dark text-white">
+                <button type="button" onclick="submitPrevious()" class="relative inline-flex items-center px-4 py-2 text-sm font-medium bg-dark text-white">
                     Anterior
                 </button>
             @endif
