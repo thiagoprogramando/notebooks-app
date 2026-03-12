@@ -16,8 +16,11 @@
                 {{ $paginator->hasMorePages() ? 'Responder' : 'Finalizar' }}
             </button>
             @if ($paginator->hasMorePages())
-                <button type="button" onclick="submitEmpty()" class="relative inline-flex items-center px-4 py-2 ml-3 text-sm font-medium bg-dark text-white border-dark">
+                <button type="button" onclick="submitEmpty()" class="relative inline-flex items-center px-4 py-2 ml-3 text-sm font-medium bg-warning text-white border-warning">
                     Pular
+                </button>
+                <button type="button" onclick="window.location.href='{{ $paginator->nextPageUrl() }}'" class="relative inline-flex items-center px-4 py-2 ml-3 text-sm font-medium bg-dark text-white">
+                    Próxima
                 </button>
             @endif
         @else 

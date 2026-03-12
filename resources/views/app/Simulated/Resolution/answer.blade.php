@@ -126,7 +126,7 @@
             body: JSON.stringify({
                 answer_result: 3,
                 simulated_question_id: {{ $question->id }},
-                next: 1
+                current_page: {{ $currentPage }}
             })
         })
         .then(res => res.json())

@@ -20,20 +20,47 @@ class AnswerController extends Controller {
             return redirect()->back()->with('infor', 'Simulado não encontrado!');
         }
 
-        $allQuestions = SimulatedQuestion::where('user_id', Auth::id())->where('simulated_id', $simulated->id)->orderBy('question_position')->get();
+        $allQuestions = SimulatedQuestion::where('user_id', Auth::id())
+            ->where('simulated_id', $simulated->id)
+            ->orderBy('question_position')
+            ->get();
+
         if ($allQuestions->isEmpty()) {
-            return redirect()->back()->with('infor', 'Simulado não disponível! contate o suporte ou aguarde liberação.');
+            return redirect()->back()->with(
+                'infor',
+                'Simulado não disponível! contate o suporte ou aguarde liberação.'
+            );
         }
 
-        if (($allQuestions->firstWhere('answer_result', 0) === null && $allQuestions->firstWhere('answer_result', 3) === null) || $simulated->date_end < now()) {
+        if (
+            ($allQuestions->firstWhere('answer_result', 0) === null &&
+            $allQuestions->firstWhere('answer_result', 3) === null)
+            || $simulated->date_end < now()
+        ) {
             return redirect()->route('review-simulated', ['uuid' => $simulated->uuid]);
         }
+
+        /*
+        |--------------------------------------------------------------------------
+        | DEFINIR PÁGINA
+        |--------------------------------------------------------------------------
+        */
 
         if ($request->has('page')) {
             $page = max(1, (int) $request->page);
         } else {
 
-            $nextPending = $allQuestions->firstWhere('answer_result', 0) ?? $allQuestions->firstWhere('answer_result', 3);
+            $currentQuestionId  = $request->input('simulated_question_id');
+            $currentPage        = max(1, (int) $request->input('current_page', 1));
+            $nextPending        = $allQuestions
+                                    ->whereIn('answer_result', [0, 3])
+                                    ->where('id', '!=', $currentQuestionId)
+                                    ->first();
+
+            if (!$nextPending) {
+                $nextPending = $allQuestions->where('id', '!=', $currentQuestionId)->firstWhere('answer_result', 3);
+            }
+
             if ($nextPending) {
                 $index = $allQuestions->search(fn($q) => $q->id === $nextPending->id);
                 $page = $index + 1;
@@ -42,7 +69,17 @@ class AnswerController extends Controller {
             }
         }
 
-        $questions = SimulatedQuestion::where('user_id', Auth::id())->where('simulated_id', $simulated->id)->orderBy('question_position')->paginate(1, ['*'], 'page', $page);
+        /*
+        |--------------------------------------------------------------------------
+        | PAGINAÇÃO
+        |--------------------------------------------------------------------------
+        */
+
+        $questions = SimulatedQuestion::where('user_id', Auth::id())
+            ->where('simulated_id', $simulated->id)
+            ->orderBy('question_position')
+            ->paginate(1, ['*'], 'page', $page);
+
         session(['answer' => true]);
 
         return view('app.Simulated.Resolution.answer', [
@@ -79,7 +116,7 @@ class AnswerController extends Controller {
                     'success' => true,
                     'redirect' => route('answer-simulated', [
                         'uuid' => $simulatedQuestion->simulated->uuid,
-                        'next' => 1
+                        'simulated_question_id' => $request->simulated_question_id
                     ])
                 ]);
             }
