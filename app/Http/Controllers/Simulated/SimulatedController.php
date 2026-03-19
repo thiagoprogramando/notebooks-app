@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 class SimulatedController extends Controller {
     
@@ -40,15 +41,11 @@ class SimulatedController extends Controller {
         }
 
         if ($simulated->status == 'completed') {
-            return redirect()->route('answer-simulated', ['uuid' => $simulated->uuid]);
+            return redirect()->route('review-simulated', ['uuid' => $simulated->uuid]);
         }
 
-        if ($simulated->date_start > now()) {
-            return redirect()->back()->with('infor', 'Aguarde período de abertura do Simulado!');
-        }
-
-        if ($simulated->date_end < now()) {
-            return redirect()->route('answer-simulated', ['uuid' => $simulated->uuid]);
+        if (Carbon::parse($simulated->date_end) < now()) {
+            return redirect()->route('review-simulated', ['uuid' => $simulated->uuid]);
         }
 
         return view('app.Simulated.Resolution.view', [
@@ -61,10 +58,15 @@ class SimulatedController extends Controller {
 
         $simulated = Simulated::where('uuid', $uuid)->first();
         if (!$simulated) {
-            return redirect()->back()->with('infor', 'Simulado não encontrado!');
+            return redirect()->back()->with('infor', 'Simulado não encontrado/disponível!');
         }
 
-        if ($simulated->simulatedAnswers()->where('user_id', Auth::user()->id)->whereIn('answer_result', [0, 3])->exists() && $simulated->date_end > now()) {
+        $allQuestions = SimulatedQuestion::where('user_id', Auth::id())->where('simulated_id', $simulated->id)->orderBy('question_position')->get();
+        if ($allQuestions->isEmpty()) {
+            return redirect()->back()->with('infor', 'Questões não disponíveis ainda!');
+        }
+
+        if ($simulated->simulatedAnswers()->where('user_id', Auth::user()->id)->whereIn('answer_result', [0, 3])->exists() && Carbon::parse($simulated->date_end) > now()) {
             return redirect()->route('answer-simulated', ['uuid' => $simulated->uuid]);
         }
 

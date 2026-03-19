@@ -10,6 +10,7 @@ use App\Models\SimulatedQuestion;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class AnswerController extends Controller {
 
@@ -17,80 +18,55 @@ class AnswerController extends Controller {
 
         $simulated = Simulated::where('uuid', $uuid)->first();
         if (!$simulated) {
-            return redirect()->back()->with('infor', 'Simulado não encontrado!');
+            return redirect()->back()->with('infor', 'Simulado não encontrado/disponível!');
         }
 
-        $allQuestions = SimulatedQuestion::where('user_id', Auth::id())
-            ->where('simulated_id', $simulated->id)
-            ->orderBy('question_position')
-            ->get();
-
+        $allQuestions = SimulatedQuestion::where('user_id', Auth::id())->where('simulated_id', $simulated->id)->orderBy('question_position')->get();
         if ($allQuestions->isEmpty()) {
-            return redirect()->back()->with(
-                'infor',
-                'Simulado não disponível! contate o suporte ou aguarde liberação.'
-            );
+            return redirect()->back()->with('infor', 'Questões não disponíveis ainda!');
         }
 
-        if (
-            ($allQuestions->firstWhere('answer_result', 0) === null &&
-            $allQuestions->firstWhere('answer_result', 3) === null)
-            || $simulated->date_end < now()
-        ) {
+        if (Carbon::parse($simulated->date_end)->endOfDay() < now()) {
             return redirect()->route('review-simulated', ['uuid' => $simulated->uuid]);
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | DEFINIR PÁGINA
-        |--------------------------------------------------------------------------
-        */
 
-        if ($request->has('page')) {
-            $page = max(1, (int) $request->page);
-        } else {
+        $action     = $request->input('action');
+        $questionId = $request->input('question_id');
 
-            $currentQuestionId  = $request->input('simulated_question_id');
-            $currentPage        = max(1, (int) $request->input('current_page', 1));
-            $nextPending        = $allQuestions
-                                    ->whereIn('answer_result', [0, 3])
-                                    ->where('id', '!=', $currentQuestionId)
-                                    ->first();
+        if ($action === 'skip' && $questionId) {
 
-            if (!$nextPending) {
-                $nextPending = $allQuestions->where('id', '!=', $currentQuestionId)->firstWhere('answer_result', 3);
-            }
-
-            if ($nextPending) {
-                $index = $allQuestions->search(fn($q) => $q->id === $nextPending->id);
-                $page = $index + 1;
-            } else {
-                $page = 1;
+            $q = $allQuestions->firstWhere('id', $questionId);
+            if ($q && $q->answer_result == 0) {
+                $q->update([
+                    'answer_result' => 3,
+                    'resolved_at'   => now()
+                ]);
             }
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | PAGINAÇÃO
-        |--------------------------------------------------------------------------
-        */
-
-        $questions = SimulatedQuestion::where('user_id', Auth::id())
-            ->where('simulated_id', $simulated->id)
-            ->orderBy('question_position')
-            ->paginate(1, ['*'], 'page', $page);
-
-        session(['answer' => true]);
+        if ($questionId) {
+            $current = $allQuestions->firstWhere('id', $questionId);
+        }
+        if (empty($current)) {
+            $current = $allQuestions->firstWhere('answer_result', 0);
+        }
+        if (!$current) {
+            $current = $allQuestions->firstWhere('answer_result', 3);
+        }
+        if (!$current) {
+            $current = $allQuestions->first();
+        }
 
         return view('app.Simulated.Resolution.answer', [
-            'simulated' => $simulated,
-            'questions' => $questions,
-            'currentPage' => $page,
+            'simulated'     => $simulated,
+            'question'      => $current,
+            'allQuestions'  => $allQuestions,
         ]);
     }
 
     public function update(Request $request) {
-
+        
         $simulatedQuestion = SimulatedQuestion::find($request->simulated_question_id);
         if (!$simulatedQuestion) {
             return response()->json([
@@ -107,50 +83,55 @@ class AnswerController extends Controller {
             ]);
         }
 
-        if ($request->answer_result == 3) {
-            $simulatedQuestion->answer_result   = 3;
-            $simulatedQuestion->resolved_at     = now();
-            $simulatedQuestion->answer_id       = null;
-            if ($simulatedQuestion->save()) {
+        if ($request->answer_result == 3 && ($simulatedQuestion->answer_result == 0 || $simulatedQuestion->answer_result == 3)) {
+            $simulatedQuestion->update([
+                'answer_result' => 3,
+                'answer_id'     => null,
+                'resolved_at'   => now()
+            ]);
+        } else {
+            $answer_id = $request->input('answer_id');
+            if (!$answer_id) {
                 return response()->json([
-                    'success' => true,
-                    'redirect' => route('answer-simulated', [
-                        'uuid' => $simulatedQuestion->simulated->uuid,
-                        'simulated_question_id' => $request->simulated_question_id
-                    ])
+                    'success' => false,
+                    'message' => 'Você precisa selecionar uma alternativa.'
                 ]);
             }
 
-            return response()->json([
-                    'success' => false,
-                    'message' => 'Erro ao salvar a resposta.'
-                ]);
-        }
-
-        $answer_id = $request->input('answer_id');
-        if (!$answer_id) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Você precisa selecionar uma alternativa.'
+            $isCorrect = $question->alternatives()->where('id', $answer_id)->where('is_correct', true)->exists();
+            $simulatedQuestion->update([
+                'answer_id'     => $answer_id,
+                'answer_result' => $isCorrect ? 1 : 2,
+                'resolved_at'   => now()
             ]);
         }
-        
-        $isCorrect                          = $question->alternatives()->where('id', $answer_id)->where('is_correct', true)->exists();
-        $simulatedQuestion->answer_id       = $answer_id;
-        $simulatedQuestion->answer_result   = $isCorrect ? 1 : 2;
-        $simulatedQuestion->resolved_at     = now();
-        if ($simulatedQuestion->save()) {
+
+
+        $allQuestions   = SimulatedQuestion::where('user_id', Auth::id())->where('simulated_id', $simulatedQuestion->simulated_id)->orderBy('question_position')->get();
+        $next           = $allQuestions->where('question_position', '>', $simulatedQuestion->question_position)->first();
+        if (!$next) {
+            $next = $allQuestions->firstWhere('answer_result', 0);
+        }
+        if (!$next) {
+            $next = $allQuestions
+                ->where('id', '!=', $simulatedQuestion->id)
+                ->firstWhere('answer_result', 3);
+        }
+        if ($next) {
             return response()->json([
                 'success' => true,
                 'redirect' => route('answer-simulated', [
-                    'uuid' => $simulatedQuestion->simulated->uuid
+                    'uuid'        => $simulatedQuestion->simulated->uuid,
+                    'question_id' => $next->id
                 ])
             ]);
         }
 
         return response()->json([
-            'success' => false,
-            'message' => 'Erro ao salvar a resposta.'
+            'success'   => true,
+            'redirect'  => route('review-simulated', [
+                'uuid'  => $simulatedQuestion->simulated->uuid
+            ])
         ]);
     }
 }
