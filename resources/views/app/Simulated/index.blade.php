@@ -163,7 +163,13 @@
                                 <button data-bs-toggle="modal" data-bs-target="#buyModal{{ $simulated->uuid }}" class="btn btn-success w-100 mb-2">COMPRAR</button>
                             @endif
                             @if (Auth::user()->role === 'admin')
-                                <a href="{{ route('simulated', ['uuid' => $simulated->uuid]) }}" class="btn btn-warning w-100">EDITAR</a>
+                                <form action="{{ route('deleted-simulated', ['uuid' => $simulated->uuid]) }}" method="POST" class="d-grid gap-2 confirm">
+                                    @csrf
+                                    <div class="btn-group">
+                                        <a href="{{ route('simulated', ['uuid' => $simulated->uuid]) }}" class="btn btn-warning">EDITAR</a>
+                                        <button type="submit" class="btn btn-danger">EXCLUIR</button>
+                                    </div>
+                                </form>
                             @endif
 
                             <div class="modal fade" id="buyModal{{ $simulated->uuid }}" data-simulated-uuid="{{ $simulated->uuid }}" tabindex="-1" aria-hidden="true">

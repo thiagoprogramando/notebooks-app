@@ -333,6 +333,16 @@ class SimulatedController extends Controller {
         return redirect()->back()->with('error', 'Autenticação falhou, verifique os dados e tente novamente!');
     }
 
+    public function destroy ($uuid) {
+
+        $simulated = Simulated::where('uuid', $uuid)->first();
+        if ($simulated && $simulated->delete()) {
+            return redirect()->back()->with('success', 'Simulado excluído com sucesso!');
+        }
+
+        return redirect()->back()->with('error', 'Falha ao excluir o simulado, tente novamente!');
+    }
+
     private function formatValue ($valor) {
         
         $valor = preg_replace('/[^0-9,]/', '', $valor);
