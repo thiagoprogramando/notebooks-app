@@ -26,11 +26,6 @@ class AnswerController extends Controller {
             return redirect()->back()->with('infor', 'Questões não disponíveis ainda!');
         }
 
-        if (Carbon::parse($simulated->date_end)->endOfDay() < now()) {
-            return redirect()->route('review-simulated', ['uuid' => $simulated->uuid]);
-        }
-
-
         $action     = $request->input('action');
         $questionId = $request->input('question_id');
 

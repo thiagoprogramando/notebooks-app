@@ -19,7 +19,7 @@ class ReviewSimulatedController extends Controller {
             return redirect()->back()->with('infor', 'Simulado não encontrado!');
         }
 
-        $questions = SimulatedQuestion::where('simulated_id', $simulated->id)->where('user_id', Auth::user()->id)->whereIn('answer_result', [1, 2])->orderBy('question_position')->get();
+        $questions = SimulatedQuestion::where('simulated_id', $simulated->id)->where('user_id', Auth::user()->id)->orderBy('question_position')->get();
         return view('app.Simulated.Review.simulated', [
             'simulated' => $simulated,
             'questions' => $questions

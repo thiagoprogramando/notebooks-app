@@ -40,14 +40,6 @@ class SimulatedController extends Controller {
             return redirect()->back()->with('infor', 'Simulado não encontrado!');
         }
 
-        if ($simulated->status == 'completed') {
-            return redirect()->route('review-simulated', ['uuid' => $simulated->uuid]);
-        }
-
-        if (Carbon::parse($simulated->date_end) < now()) {
-            return redirect()->route('review-simulated', ['uuid' => $simulated->uuid]);
-        }
-
         return view('app.Simulated.Resolution.view', [
             'simulated' => $simulated,
             'mode'      => $mode == 'roles' ? 'roles' :'presentation'
@@ -66,7 +58,7 @@ class SimulatedController extends Controller {
             return redirect()->back()->with('infor', 'Questões não disponíveis ainda!');
         }
 
-        if ($simulated->simulatedAnswers()->where('user_id', Auth::user()->id)->whereIn('answer_result', [0, 3])->exists() && Carbon::parse($simulated->date_end) > now()) {
+        if ($simulated->simulatedAnswers()->where('user_id', Auth::user()->id)->whereIn('answer_result', [0, 3])->exists() && Carbon::parse($simulated->date_end)->format('Y-m-d') >= now()->format('Y-m-d')) {
             return redirect()->route('answer-simulated', ['uuid' => $simulated->uuid]);
         }
 

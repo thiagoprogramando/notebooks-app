@@ -28,9 +28,9 @@
         transform: scale(1.05);
     }
     .questions.answered {
-        background-color: #d4edda;
-        border-color: #28a745;
-        color: #155724;
+        background-color: #faffc2;
+        border-color: #c9d918;
+        color: #ffd000;
     }
     .questions.current {
         border: 2px solid #c27a27;

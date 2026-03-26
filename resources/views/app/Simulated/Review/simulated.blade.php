@@ -5,11 +5,9 @@
     <div class="card mb-3">
 
         <div class="card-header">
-            <div class="d-flex justify-content-center">
-                <h5 class="mb-1">Simulado: {{ $simulated->title }}</h5>
-            </div>
-            <div class="card-subtitle">
-                REVISAR SIMULADO RESOLVIDO
+            <div class="justify-content-center">
+                <h4 class="text-center">{{ $simulated->title }}</h4>
+                <p class="text-center text-info">REVISAR SIMULADO RESOLVIDO</p>
             </div>
         </div>
 
@@ -22,6 +20,7 @@
                         </div>
 
                         <div class="col-12 col-sm-12 col-md-12 col-lg-12 bg-light p-3 rounded mt-1 mb-1">
+                            <p>Questão {{ $question->question_position }} de {{ $questions->count() }}</p>
                             <h5> {!! $question->question->title !!} </h5>
                         </div>
 
