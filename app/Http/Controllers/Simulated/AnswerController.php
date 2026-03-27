@@ -30,7 +30,6 @@ class AnswerController extends Controller {
         $questionId = $request->input('question_id');
 
         if ($action === 'skip' && $questionId) {
-
             $q = $allQuestions->firstWhere('id', $questionId);
             if ($q && $q->answer_result == 0) {
                 $q->update([
@@ -53,10 +52,15 @@ class AnswerController extends Controller {
             $current = $allQuestions->first();
         }
 
+        $hasUnanswered = $allQuestions->contains(function ($q) {
+            return is_null($q->answer_id);
+        });
+
         return view('app.Simulated.Resolution.answer', [
             'simulated'     => $simulated,
             'question'      => $current,
             'allQuestions'  => $allQuestions,
+            'isFinished'    => !$hasUnanswered
         ]);
     }
 

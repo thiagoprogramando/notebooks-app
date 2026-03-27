@@ -18,7 +18,7 @@
                 <div class="row">
                     <div class="col-12 col-sm-12 col-md-5 col-lg-5 mb-5">
                         <h5 class="text-center">Dados</h5>
-                        <form action="{{ route('updated-simulated', ['uuid' => $simulated->uuid]) }}" method="POST" class="row border g-3 p-3" id="form">
+                        <form action="{{ route('updated-simulated', ['uuid' => $simulated->uuid]) }}" method="POST" class="row border g-3 p-3" id="form" enctype="multipart/form-data">
                             @csrf
                             <div class="col-12">
                                 <div class="form-floating form-floating-outline mb-2">

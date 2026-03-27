@@ -96,6 +96,11 @@
                         <button type="button" onclick="submitAnswer()" class="relative inline-flex items-center px-4 py-2 ml-3 text-sm font-medium bg-success text-white border-success">
                             Responder
                         </button>
+                        @if ($isFinished)
+                            <button type="button" onclick="submitEnd()" class="relative inline-flex items-center px-4 py-2 ml-3 text-sm font-medium bg-success text-white border-success">
+                                Finalizar
+                            </button>
+                        @endif
                         @php
                             $currentIndex = $allQuestions->search(fn($q) => $q->id === $question->id);
                             $nextQuestion = $allQuestions[$currentIndex + 1] ?? null;
@@ -153,6 +158,23 @@
         });
     }
 
+    function submitEnd() {
+
+        Swal.fire({
+            title: 'Finalizar simulado?',
+            text: "Você deverá aguardar até a finalização do período de respostas para acessar os resultados!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Sim, finalizar!',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = "{{ route('review-simulated', ['uuid' => $simulated->uuid, 'reports' => true]) }}";
+            }
+        });
+    }
 
     function submitEmpty() {
 
