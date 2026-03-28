@@ -78,11 +78,7 @@
                     <div class="col-12 col-sm-12 col-md-7 col-lg-7">
 
                         <div class="btn-group d-flex justify-content-center">
-                            @if ($simulated->status == 'completed')
-                                <a href="{{ route('sumary-simulated', ['simulated' => $simulated->uuid]) }}" class="btn btn-outline-dark">REVISAR SIMULADO RESOLVIDO</a> 
-                            @else
-                                <a href="{{ route('answer-simulated', ['uuid' => $simulated->uuid]) }}" class="btn btn-outline-dark">ACESSAR QUESTÕES</a> 
-                            @endif
+                            <a href="{{ route('sumary-simulated', ['simulated' => $simulated->uuid]) }}" class="btn btn-outline-dark">REVISAR SIMULADO RESOLVIDO</a> 
                         </div>
 
                         <div class="table-responsive text-nowrap">

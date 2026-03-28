@@ -46,7 +46,7 @@ class SimulatedController extends Controller {
         ]);
     }
 
-    public function review ($uuid, $reports = null) {
+    public function review ($uuid) {
 
         $simulated = Simulated::where('uuid', $uuid)->first();
         if (!$simulated) {
@@ -58,7 +58,10 @@ class SimulatedController extends Controller {
             return redirect()->back()->with('infor', 'Questões não disponíveis ainda! Aguarde a data de Início do Simulado:'. Carbon::parse($simulated->date_start)->format('d/m/Y'));
         }
 
-        if ($simulated->status != 'completed' && $reports != true) {
+        $allConfirmed = $allQuestions->every(function ($question) {
+            return $question->answer_confirmed == 1;
+        });
+        if ($allConfirmed == false) {
             return redirect()->route('answer-simulated', ['uuid' => $simulated->uuid]);
         }
 

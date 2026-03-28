@@ -53,7 +53,7 @@ class AnswerController extends Controller {
         }
 
         $hasUnanswered = $allQuestions->contains(function ($q) {
-            return is_null($q->answer_id);
+            return $q->answer_result == 0;
         });
 
         return view('app.Simulated.Resolution.answer', [
@@ -130,6 +130,27 @@ class AnswerController extends Controller {
             'success'   => true,
             'redirect'  => route('review-simulated', [
                 'uuid'  => $simulatedQuestion->simulated->uuid
+            ])
+        ]);
+    }
+
+    public function finishSimulated(Request $request) {
+
+        $simulated = Simulated::find($request->simulated_id);
+        if (!$simulated) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Simulado não encontrado/disponível!'
+            ]);
+        }
+
+        SimulatedQuestion::where('user_id', Auth::id())->where('simulated_id', $simulated->id)->update(['answer_confirmed' => true]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Simulado finalizado com sucesso!',
+            'redirect' => route('review-simulated', [
+                'uuid' => $simulated->uuid
             ])
         ]);
     }

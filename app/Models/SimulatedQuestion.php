@@ -15,6 +15,7 @@ class SimulatedQuestion extends Model {
         'question_position',
         'answer_id',
         'answer_result',
+        'answer_confirmed',
         'resolved_at',
     ];
 

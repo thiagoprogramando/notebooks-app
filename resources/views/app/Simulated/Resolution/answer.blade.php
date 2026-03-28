@@ -74,6 +74,7 @@
                 <form id="answerForm" method="POST" class="col-12 col-sm-12 col-md-12 col-lg-12 row">
                     @csrf
                     <input type="hidden" name="simulated_question_id" value="{{ $question->id }}">
+                    <input type="hidden" name="simulated_id" value="{{ $question->simulated_id }}">
                    
                     <div class="col-12 col-sm-12 col-md-12 col-lg-12 bg-light p-3 rounded mt-1 mb-1">
                         <h5> {!! $question->question->title !!} </h5>
@@ -160,6 +161,9 @@
 
     function submitEnd() {
 
+        const form = document.getElementById('answerForm');
+        const formData = new FormData(form);
+
         Swal.fire({
             title: 'Finalizar simulado?',
             text: "Você deverá aguardar até a finalização do período de respostas para acessar os resultados!",
@@ -171,7 +175,34 @@
             cancelButtonText: 'Cancelar'
         }).then((result) => {
             if (result.isConfirmed) {
-                window.location.href = "{{ route('review-simulated', ['uuid' => $simulated->uuid, 'reports' => true]) }}";
+                fetch("{{ route('answer-simulated-end') }}", {
+                    method: "POST",
+                    headers: {
+                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(data => {
+
+                    if (data.success) {
+                        window.location.href = data.redirect;
+                    } else {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Atenção',
+                            text: data.message
+                        });
+                    }
+
+                })
+                .catch(() => {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Erro',
+                        text: 'Falha na comunicação com o servidor.'
+                    });
+                });
             }
         });
     }

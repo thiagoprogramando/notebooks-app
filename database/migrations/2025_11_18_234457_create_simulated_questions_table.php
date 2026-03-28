@@ -15,6 +15,7 @@ return new class extends Migration {
             $table->integer('question_position');
             $table->foreignId('answer_id')->nullable()->constrained('question_alternatives');
             $table->tinyInteger('answer_result')->default(0);
+            $table->tinyInteger('answer_confirmed')->default(0);
             $table->timestamp('resolved_at')->nullable();
             $table->timestamps();
             $table->softDeletes();
