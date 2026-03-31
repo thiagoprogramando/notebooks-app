@@ -157,8 +157,6 @@
                             </div>
                             @if ($simulated->hasInvoice(Auth::id(), 1))
                                 <a href="{{ route('view-simulated', ['uuid' => $simulated->uuid]) }}" class="btn btn-primary w-100 mb-2">ACESSAR SIMULADO</a>
-                            @elseif (\Carbon\Carbon::parse($simulated->date_end)->addDay() < now() || $simulated->status == 'completed')
-                                <button type="button" class="btn btn-dark w-100 mb-2">SIMULADO INDISPONÍVEL</button>
                             @else
                                 <button data-bs-toggle="modal" data-bs-target="#buyModal{{ $simulated->uuid }}" class="btn btn-success w-100 mb-2">COMPRAR</button>
                             @endif

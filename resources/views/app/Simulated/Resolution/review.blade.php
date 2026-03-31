@@ -102,7 +102,7 @@
                                             <td class="text-center">
                                                 {{ $question->answer->label ?? ' ' }}
                                             </td>
-                                            <td class="text-success fw-medium text-center @if ($simulated->status != 'completed') d-none @endif">
+                                            <td class="text-success fw-medium text-center">
                                                 {{ $question->question->correctAlternative()->first()->label }}
                                             </td>
                                         </tr>
