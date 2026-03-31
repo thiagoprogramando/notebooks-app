@@ -62,7 +62,6 @@
             </div>
         </div>
        
-
         <div class="card-body">
             <div class="row">
                 <div class="col-12">
@@ -70,7 +69,6 @@
                         <div class="divider-text">Questão</div>
                     </div>
                 </div>
-
                 <form id="answerForm" method="POST" class="col-12 col-sm-12 col-md-12 col-lg-12 row">
                     @csrf
                     <input type="hidden" name="simulated_question_id" value="{{ $question->id }}">
@@ -166,7 +164,7 @@
 
         Swal.fire({
             title: 'Finalizar simulado?',
-            text: "Você deverá aguardar até a finalização do período de respostas para acessar os resultados!",
+            text: "Você receberá acesso ao gabarito e revisões, mas não poderá alterar respostas!",
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#3085d6',

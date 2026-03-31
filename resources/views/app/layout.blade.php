@@ -190,26 +190,12 @@
                     
                         <aside id="layout-menu" class="layout-menu-horizontal menu-horizontal menu bg-menu-theme flex-grow-0">
                             <div class="container-xxl d-flex h-100">
-                                <ul class="menu-inner">
+                                <ul class="menu-inner justify-content-center">
                                     <li class="menu-item">
-                                        <a href="{{ route('app') }}" class="menu-link menu-toggle">
+                                        <a href="{{ route('app') }}" class="menu-link">
                                             <i class="menu-icon tf-icons ri-home-fill"></i>
                                             <div data-i18n="Início">Início</div>
                                         </a>
-                                        <ul class="menu-sub">
-                                            <li class="menu-item">
-                                                <a href="{{ route('app') }}" class="menu-link">
-                                                    <i class="menu-icon tf-icons ri-home-fill"></i>
-                                                    <div data-i18n="Início">Início</div>
-                                                </a>
-                                            </li>
-                                            <li class="menu-item">
-                                                <a href="{{ route('search') }}" class="menu-link">
-                                                    <i class="menu-icon ri-search-line ri-22px scaleX-n1-rtl"></i>
-                                                    <div data-i18n="Pesquisar">Pesquisar</div>
-                                                </a>
-                                            </li>
-                                        </ul>
                                     </li>
 
                                     <li class="menu-item">

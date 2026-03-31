@@ -31,7 +31,7 @@ class Invoice extends Model {
     }
 
     public function simulated() {
-        return $this->belongsTo(Simulated::class, 'simulated_id');
+        return $this->belongsTo(Simulated::class, 'simulated_id')->withTrashed();
     }
 
     public function statusLabel() {

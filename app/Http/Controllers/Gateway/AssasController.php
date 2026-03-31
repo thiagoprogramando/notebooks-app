@@ -30,10 +30,11 @@ class AssasController extends Controller {
                     'User-Agent'   => env('APP_NAME')
                 ],
                 'json' => [
-                    'name'        => $name,
-                    'cpfCnpj'     => $cpfcnpj,
-                    'mobilePhone' => $mobilePhone,
-                    'email'       => $email,
+                    'name'                  => $name,
+                    'cpfCnpj'               => $cpfcnpj,
+                    'mobilePhone'           => $mobilePhone,
+                    'email'                 => $email,
+                    'notificationDisabled'  => true
                 ],
                 'verify' => false
             ];
