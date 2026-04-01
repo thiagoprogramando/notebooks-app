@@ -94,7 +94,7 @@ class NotebookController extends Controller {
     public function create() {
 
         $userId     = Auth::id();
-        $contents   = Content::with([
+        $contents = Content::with([
             'topics' => function ($query) use ($userId) {
                 $query->leftJoin('topic_groups as g', 'topics.group_id', '=', 'g.id')
                     ->select('topics.*', 'g.order as group_order')
@@ -104,30 +104,33 @@ class NotebookController extends Controller {
                         },
                         'questions as resolved_count' => function ($q) use ($userId) {
                             $q->whereNull('simulated_id')
-                            ->whereHas('notebookQuestions', function ($nq) use ($userId) {
-                                $nq->where('user_id', $userId)
-                                    ->where('answer_result', 1);
-                            });
+                                ->whereHas('notebookQuestions', function ($nq) use ($userId) {
+                                    $nq->withTrashed()
+                                        ->where('user_id', $userId)
+                                        ->where('answer_result', 1);
+                                });
                         },
                         'questions as failer_count' => function ($q) use ($userId) {
                             $q->whereNull('simulated_id')
-                            ->whereHas('notebookQuestions', function ($nq) use ($userId) {
-                                $nq->where('user_id', $userId)
-                                    ->where('answer_result', 2);
-                            });
+                                ->whereHas('notebookQuestions', function ($nq) use ($userId) {
+                                    $nq->withTrashed()
+                                        ->where('user_id', $userId)
+                                        ->where('answer_result', 2);
+                                });
                         },
                         'questions as eliminated_count' => function ($q) use ($userId) {
                             $q->whereNull('simulated_id')
-                            ->whereHas('notebookQuestions', function ($nq) use ($userId) {
-                                $nq->where('user_id', $userId)
-                                    ->whereIn('answer_result', [1,2]);
-                            });
+                                ->whereHas('notebookQuestions', function ($nq) use ($userId) {
+                                    $nq->withTrashed()
+                                        ->where('user_id', $userId)
+                                        ->whereIn('answer_result', [1,2]);
+                                });
                         },
                         'questions as favorited_count' => function ($q) use ($userId) {
                             $q->whereNull('simulated_id')
-                            ->whereHas('favorites', function ($fav) use ($userId) {
-                                $fav->where('user_id', $userId);
-                            })->whereNull('questions.deleted_at');
+                                ->whereHas('favorites', function ($fav) use ($userId) {
+                                    $fav->where('user_id', $userId);
+                                })->whereNull('questions.deleted_at');
                         },
                     ])
                     ->whereHas('questions', function ($q) {
@@ -225,26 +228,29 @@ class NotebookController extends Controller {
             $applyFilters = function ($query) use ($request, $user_id) {
 
                 if ($request->filter == 'filter_success') {
-                    // remove questões acertadas
+                    // Exclui questões acertadas (answer_result = 1)
                     $query->whereDoesntHave('notebookQuestions', function($q) use ($user_id) {
-                        $q->where('user_id', $user_id)
-                        ->where('answer_result', 1);
+                        $q->withTrashed() // 👈
+                            ->where('user_id', $user_id)
+                            ->where('answer_result', 1);
                     });
                 }
 
                 if ($request->filter == 'filter_failer') {
-                    // remove questões já respondidas (acerto ou erro)
+                    // Exclui questões erradas (answer_result = 2)
                     $query->whereDoesntHave('notebookQuestions', function($q) use ($user_id) {
-                        $q->where('user_id', $user_id)
-                        ->whereNotNull('answer_result');
+                        $q->withTrashed() // 👈
+                            ->where('user_id', $user_id)
+                            ->where('answer_result', 2); // 👈 era whereNotNull, corrigido para = 2
                     });
                 }
 
                 if ($request->filter == 'filter_eliminated') {
-                    // 🔥 CORREÇÃO: remover TODAS já respondidas
+                    // Exclui questões já respondidas (acerto ou erro)
                     $query->whereDoesntHave('notebookQuestions', function($q) use ($user_id) {
-                        $q->where('user_id', $user_id)
-                        ->whereNotNull('answer_result');
+                        $q->withTrashed() // 👈
+                            ->where('user_id', $user_id)
+                            ->whereIn('answer_result', [1, 2]); // 👈 era whereNotNull, corrigido
                     });
                 }
 
@@ -374,7 +380,7 @@ class NotebookController extends Controller {
                 'status'  => 'draft',
             ]);
 
-            NotebookQuestion::where('notebook_id', $notebook->id)->delete();
+            NotebookQuestion::where('notebook_id', $notebook->id)->where('answer_result', 0)->forceDelete();
 
             $allSelectedQuestions = [];
             $position             = 1;
@@ -385,24 +391,25 @@ class NotebookController extends Controller {
 
                 if ($request->filter == 'filter_success') {
                     $query->whereDoesntHave('notebookQuestions', function($q) use ($user_id) {
-                        $q->where('user_id', $user_id)
-                        ->where('answer_result', 1);
+                        $q->withTrashed() // 👈
+                            ->where('user_id', $user_id)
+                            ->where('answer_result', 1);
                     });
                 }
 
                 if ($request->filter == 'filter_failer') {
-                    // remove qualquer questão já respondida
                     $query->whereDoesntHave('notebookQuestions', function($q) use ($user_id) {
-                        $q->where('user_id', $user_id)
-                        ->whereNotNull('answer_result');
+                        $q->withTrashed() // 👈
+                            ->where('user_id', $user_id)
+                            ->where('answer_result', 2); // 👈 era whereNotNull
                     });
                 }
 
                 if ($request->filter == 'filter_eliminated') {
-                    // 🔥 corrigido: remover todas respondidas
                     $query->whereDoesntHave('notebookQuestions', function($q) use ($user_id) {
-                        $q->where('user_id', $user_id)
-                        ->whereNotNull('answer_result');
+                        $q->withTrashed() // 👈
+                            ->where('user_id', $user_id)
+                            ->whereIn('answer_result', [1, 2]); // 👈 era whereNotNull
                     });
                 }
 
