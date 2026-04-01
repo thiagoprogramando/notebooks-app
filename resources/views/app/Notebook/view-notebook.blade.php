@@ -37,7 +37,7 @@
                         <div class="scroll-box">
                             <select multiple id="available-topics" class="form-control" size="15">
                                 @foreach($contents as $content)
-                                    <optgroup label="{{ $content->title }}">
+                                    <optgroup label="{{ $content->title }}" data-content-id="{{ $content->id }}">
                                         <option value="content:{{ $content->id }}" data-content-id="{{ $content->id }}" class="content-option">
                                             [Todo] {{ $content->title }}
                                         </option>
@@ -49,7 +49,9 @@
                                                 data-filter-resolved="{{ $topic->resolved_count ?? 0 }}" 
                                                 data-filter-failer="{{ $topic->failer_count ?? 0 }}" 
                                                 data-filter-eliminated="{{ $topic->eliminated_count ?? 0 }}" 
-                                                data-filter-favorited="{{ $topic->favorited_count ?? 0 }}">
+                                                data-filter-favorited="{{ $topic->favorited_count ?? 0 }}"
+                                                style="display:none"
+                                            >
                                                 {{ $topic->title }}
                                             </option>
                                         @endforeach
@@ -207,9 +209,9 @@
                     } else if (activeFilter.value === 'filter_success') {
                         total += (stats.total - stats.filterResolved);
                     } else if (activeFilter.value === 'filter_failer') {
-                        total += (stats.total - stats.filterFailer - stats.filterResolved); // descontar resolvidas
+                        total += (stats.total - stats.filterFailer); // descontar resolvidas
                     } else if (activeFilter.value === 'filter_eliminated') {
-                        total += stats.filterEliminated;
+                        total += (stats.total - stats.filterEliminated);
                     } else if (activeFilter.value === 'filter_favorited') {
                         total += stats.filterFavorited;
                     }

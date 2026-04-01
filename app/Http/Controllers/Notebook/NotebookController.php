@@ -28,40 +28,8 @@ class NotebookController extends Controller {
             return redirect()->back()->with('infor', 'Caderno não encontrado, verique os dados e tente novamente!');
         }
 
-        $userId = Auth::id();
-
-        // $contents = Content::with([
-        //     'topics' => function ($query) use ($userId) {
-        //         $query->withCount([
-        //             'questions',
-        //             'questions as resolved_count' => function ($q) use ($userId) {
-        //                 $q->whereHas('notebookQuestions', function ($nq) use ($userId) {
-        //                     $nq->where('user_id', $userId)
-        //                     ->where('answer_result', 1);
-        //                 });
-        //             },
-        //             'questions as failer_count' => function ($q) use ($userId) {
-        //                 $q->whereHas('notebookQuestions', function ($nq) use ($userId) {
-        //                     $nq->where('user_id', $userId)
-        //                     ->where('answer_result', 2);
-        //                 });
-        //             },
-        //             'questions as eliminated_count' => function ($q) use ($userId) {
-        //                 $q->whereHas('notebookQuestions', function ($nq) use ($userId) {
-        //                     $nq->where('user_id', $userId)
-        //                     ->whereIn('answer_result', [1,2]); 
-        //                 });
-        //             },
-        //             'questions as favorited_count' => function ($q) use ($userId) {
-        //                 $q->whereHas('favorites', function ($fav) use ($userId) {
-        //                     $fav->where('user_id', $userId);
-        //                 })->whereNull('questions.deleted_at');
-        //             },
-        //         ]);
-        //     }
-        // ])->where('status', 'active')->orderBy('order', 'asc')->get();
-
-        $contents = Content::with([
+        $userId     = Auth::id();
+        $contents   = Content::with([
             'topics' => function ($query) use ($userId) {
                 $query->withCount([
 
@@ -126,88 +94,49 @@ class NotebookController extends Controller {
     public function create() {
 
         $userId     = Auth::id();
-        // $contents   = Content::with([
-        // 'topics' => function ($query) use ($userId) {
-        //         $query->leftJoin('topic_groups as g', 'topics.group_id', '=', 'g.id')
-        //             ->select('topics.*', 'g.order as group_order')
-        //             ->withCount([
-        //                 'questions',
-        //                 'questions as resolved_count' => function ($q) use ($userId) {
-        //                     $q->whereHas('notebookQuestions', function ($nq) use ($userId) {
-        //                         $nq->where('user_id', $userId)
-        //                             ->where('answer_result', 1);
-        //                     });
-        //                 },
-        //                 'questions as failer_count' => function ($q) use ($userId) {
-        //                     $q->whereHas('notebookQuestions', function ($nq) use ($userId) {
-        //                         $nq->where('user_id', $userId)
-        //                             ->where('answer_result', 2);
-        //                     });
-        //                 },
-        //                 'questions as eliminated_count' => function ($q) use ($userId) {
-        //                     $q->whereHas('notebookQuestions', function ($nq) use ($userId) {
-        //                         $nq->where('user_id', $userId)
-        //                             ->whereIn('answer_result', [1,2]); 
-        //                     });
-        //                 },
-        //                 'questions as favorited_count' => function ($q) use ($userId) {
-        //                     $q->whereHas('favorites', function ($fav) use ($userId) {
-        //                         $fav->where('user_id', $userId);
-        //                     })->whereNull('questions.deleted_at');
-        //                 },
-        //             ])
-        //             ->orderByRaw('COALESCE(g.order, 0) asc')
-        //             ->orderBy('topics.order', 'asc');
-        //     }
-        // ])->where('status', 'active')->orderBy('order', 'asc')->get();
-
-            $contents = Content::with([
-                'topics' => function ($query) use ($userId) {
-                    $query->leftJoin('topic_groups as g', 'topics.group_id', '=', 'g.id')
-                        ->select('topics.*', 'g.order as group_order')
-                        ->withCount([
-                            'questions' => function ($q) {
-                                $q->whereNull('simulated_id');
-                            },
-
-                            'questions as resolved_count' => function ($q) use ($userId) {
-                                $q->whereNull('simulated_id')
-                                ->whereHas('notebookQuestions', function ($nq) use ($userId) {
-                                    $nq->where('user_id', $userId)
-                                        ->where('answer_result', 1);
-                                });
-                            },
-
-                            'questions as failer_count' => function ($q) use ($userId) {
-                                $q->whereNull('simulated_id')
-                                ->whereHas('notebookQuestions', function ($nq) use ($userId) {
-                                    $nq->where('user_id', $userId)
-                                        ->where('answer_result', 2);
-                                });
-                            },
-
-                            'questions as eliminated_count' => function ($q) use ($userId) {
-                                $q->whereNull('simulated_id')
-                                ->whereHas('notebookQuestions', function ($nq) use ($userId) {
-                                    $nq->where('user_id', $userId)
-                                        ->whereIn('answer_result', [1,2]);
-                                });
-                            },
-
-                            'questions as favorited_count' => function ($q) use ($userId) {
-                                $q->whereNull('simulated_id')
-                                ->whereHas('favorites', function ($fav) use ($userId) {
-                                    $fav->where('user_id', $userId);
-                                })->whereNull('questions.deleted_at');
-                            },
-                        ])
-                        ->whereHas('questions', function ($q) {
+        $contents   = Content::with([
+            'topics' => function ($query) use ($userId) {
+                $query->leftJoin('topic_groups as g', 'topics.group_id', '=', 'g.id')
+                    ->select('topics.*', 'g.order as group_order')
+                    ->withCount([
+                        'questions' => function ($q) {
                             $q->whereNull('simulated_id');
-                        })
-                        ->orderByRaw('COALESCE(g.order, 0) asc')
-                        ->orderBy('topics.order', 'asc');
-                }
-            ])->where('status', 'active')->orderBy('order', 'asc')->get();
+                        },
+                        'questions as resolved_count' => function ($q) use ($userId) {
+                            $q->whereNull('simulated_id')
+                            ->whereHas('notebookQuestions', function ($nq) use ($userId) {
+                                $nq->where('user_id', $userId)
+                                    ->where('answer_result', 1);
+                            });
+                        },
+                        'questions as failer_count' => function ($q) use ($userId) {
+                            $q->whereNull('simulated_id')
+                            ->whereHas('notebookQuestions', function ($nq) use ($userId) {
+                                $nq->where('user_id', $userId)
+                                    ->where('answer_result', 2);
+                            });
+                        },
+                        'questions as eliminated_count' => function ($q) use ($userId) {
+                            $q->whereNull('simulated_id')
+                            ->whereHas('notebookQuestions', function ($nq) use ($userId) {
+                                $nq->where('user_id', $userId)
+                                    ->whereIn('answer_result', [1,2]);
+                            });
+                        },
+                        'questions as favorited_count' => function ($q) use ($userId) {
+                            $q->whereNull('simulated_id')
+                            ->whereHas('favorites', function ($fav) use ($userId) {
+                                $fav->where('user_id', $userId);
+                            })->whereNull('questions.deleted_at');
+                        },
+                    ])
+                    ->whereHas('questions', function ($q) {
+                        $q->whereNull('simulated_id');
+                    })
+                    ->orderByRaw('COALESCE(g.order, 0) asc')
+                    ->orderBy('topics.order', 'asc');
+            }
+        ])->where('status', 'active')->orderBy('order', 'asc')->get();
 
         return view('app.Notebook.create-notebook', compact('contents'));
     }
@@ -268,11 +197,11 @@ class NotebookController extends Controller {
         $totalQuestions  = (int) $request->input('quanty_questions');
         $user_id         = Auth::id();
 
-        $topicsCount = count($topicIds);
-        if ($topicsCount === 0) {
+        if (empty($topicIds)) {
             return redirect()->back()->with('infor', 'Nenhum tópico selecionado. Por favor, selecione pelo menos um tópico!');
         }
 
+        $topicsCount        = count($topicIds);
         $questionsPerTopic  = floor($totalQuestions / $topicsCount);
         $remaining          = $totalQuestions % $topicsCount;
         $filters            = $request->except(['title']);
@@ -280,6 +209,7 @@ class NotebookController extends Controller {
         DB::beginTransaction();
 
         try {
+
             $notebook = Notebook::create([
                 'title'         => $request->title,
                 'created_by'    => $user_id,
@@ -287,46 +217,64 @@ class NotebookController extends Controller {
                 'status'        => 'draft',
             ]);
 
-            $allSelectedQuestions   = [];
-            $position               = 1;
-            $remainingQuestions     = $totalQuestions;
+            $allSelectedQuestions = [];
+            $position             = 1;
+            $remainingQuestions   = $totalQuestions;
 
-            foreach ($topicIds as $index => $topicId) {
-                
-                $limit = min($questionsPerTopic + ($remaining-- > 0 ? 1 : 0), $remainingQuestions);
+            // 🔥 Função reutilizável de filtros
+            $applyFilters = function ($query) use ($request, $user_id) {
 
-                $query = Question::where('topic_id', $topicId)->whereNull('simulated_id');
-
-                // 🔹 Eliminar questões acertadas
                 if ($request->filter == 'filter_success') {
+                    // remove questões acertadas
                     $query->whereDoesntHave('notebookQuestions', function($q) use ($user_id) {
                         $q->where('user_id', $user_id)
                         ->where('answer_result', 1);
                     });
-                 
                 }
 
-                // 🔹 Eliminar questões já resolvidas (acertos ou erros)
                 if ($request->filter == 'filter_failer') {
+                    // remove questões já respondidas (acerto ou erro)
                     $query->whereDoesntHave('notebookQuestions', function($q) use ($user_id) {
                         $q->where('user_id', $user_id)
-                        ->whereIn('answer_result', [1,2]);
+                        ->whereNotNull('answer_result');
                     });
                 }
 
-                // 🔹 Mostrar apenas questões que o usuário errou
                 if ($request->filter == 'filter_eliminated') {
-                    $query->whereHas('notebookQuestions', function($q) use ($user_id) {
+                    // 🔥 CORREÇÃO: remover TODAS já respondidas
+                    $query->whereDoesntHave('notebookQuestions', function($q) use ($user_id) {
                         $q->where('user_id', $user_id)
-                        ->where('answer_result', 2);
+                        ->whereNotNull('answer_result');
                     });
                 }
 
-                // 🔹 Mostrar apenas favoritas
                 if ($request->filter == 'filter_favorited') {
                     $query->whereHas('favorites', function($q) use ($user_id) {
                         $q->where('user_id', $user_id);
                     });
+                }
+
+                return $query;
+            };
+
+            foreach ($topicIds as $topicId) {
+
+                $limit = min(
+                    $questionsPerTopic + ($remaining-- > 0 ? 1 : 0),
+                    $remainingQuestions
+                );
+
+                $query = Question::where('topic_id', $topicId)
+                    ->whereNull('simulated_id');
+
+                $query = $applyFilters($query);
+
+                // evitar repetir questões já selecionadas
+                if (!empty($allSelectedQuestions)) {
+                    $query->whereNotIn(
+                        'id',
+                        collect($allSelectedQuestions)->pluck('question_id')
+                    );
                 }
 
                 $questions = $query->inRandomOrder()->limit($limit)->get();
@@ -345,43 +293,23 @@ class NotebookController extends Controller {
                 $remainingQuestions -= $questions->count();
             }
 
+            // 🔥 Completar com questões extras se faltar
             if ($remainingQuestions > 0) {
-                
-                $extraQuestionsQuery = Question::whereIn('topic_id', $topicIds)->whereNotIn('id', collect($allSelectedQuestions)->pluck('question_id'));
 
-                 // 🔹 Eliminar questões acertadas
-                if ($request->filter == 'filter_success') {
-                    $query->whereDoesntHave('notebookQuestions', function($q) use ($user_id) {
-                        $q->where('user_id', $user_id)
-                        ->where('answer_result', 1);
-                    });
-                 
+                $extraQuestionsQuery = Question::whereIn('topic_id', $topicIds)
+                    ->whereNull('simulated_id');
+
+                $extraQuestionsQuery = $applyFilters($extraQuestionsQuery);
+
+                if (!empty($allSelectedQuestions)) {
+                    $extraQuestionsQuery->whereNotIn(
+                        'id',
+                        collect($allSelectedQuestions)->pluck('question_id')
+                    );
                 }
 
-                // 🔹 Eliminar questões já resolvidas (acertos ou erros)
-                if ($request->filter == 'filter_failer') {
-                    $query->whereDoesntHave('notebookQuestions', function($q) use ($user_id) {
-                        $q->where('user_id', $user_id)
-                        ->whereIn('answer_result', [1,2]);
-                    });
-                }
-
-                // 🔹 Mostrar apenas questões que o usuário errou
-                if ($request->filter == 'filter_eliminated') {
-                    $query->whereHas('notebookQuestions', function($q) use ($user_id) {
-                        $q->where('user_id', $user_id)
-                        ->where('answer_result', 2);
-                    });
-                }
-
-                // 🔹 Mostrar apenas favoritas
-                if ($request->filter == 'filter_favorited') {
-                    $query->whereHas('favorites', function($q) use ($user_id) {
-                        $q->where('user_id', $user_id);
-                    });
-                }
-
-                $extraQuestions = $extraQuestionsQuery->inRandomOrder()
+                $extraQuestions = $extraQuestionsQuery
+                    ->inRandomOrder()
                     ->limit($remainingQuestions)
                     ->get();
 
@@ -398,12 +326,18 @@ class NotebookController extends Controller {
             }
 
             NotebookQuestion::insert($allSelectedQuestions);
+
             DB::commit();
 
-            return redirect()->route('answer', ['notebook' => $notebook->id])->with('success', count($allSelectedQuestions) . ' questões adicionadas ao caderno com sucesso!');
+            return redirect()
+                ->route('answer', ['notebook' => $notebook->id])
+                ->with('success', count($allSelectedQuestions) . ' questões adicionadas ao caderno com sucesso!');
+
         } catch (\Exception $e) {
+
             DB::rollBack();
             report($e);
+
             return back()->withErrors('Erro ao criar caderno: ' . $e->getMessage());
         }
     }
@@ -420,11 +354,11 @@ class NotebookController extends Controller {
         $totalQuestions  = (int) $request->input('quanty_questions');
         $user_id         = Auth::id();
 
-        $topicsCount = count($topicIds);
-        if ($topicsCount === 0) {
+        if (empty($topicIds)) {
             return redirect()->back()->with('infor', 'Nenhum tópico selecionado. Por favor, selecione pelo menos um tópico!');
         }
 
+        $topicsCount        = count($topicIds);
         $questionsPerTopic  = floor($totalQuestions / $topicsCount);
         $remaining          = $totalQuestions % $topicsCount;
         $filters            = $request->except(['title']);
@@ -446,12 +380,10 @@ class NotebookController extends Controller {
             $position             = 1;
             $remainingQuestions   = $totalQuestions;
 
-            foreach ($topicIds as $index => $topicId) {
-                $limit = min($questionsPerTopic + ($remaining-- > 0 ? 1 : 0), $remainingQuestions);
+            // 🔥 Função reutilizável de filtros (MESMA do store)
+            $applyFilters = function ($query) use ($request, $user_id) {
 
-                $query = Question::where('topic_id', $topicId)->whereNull('simulated_id');
-
-               if ($request->filter == 'filter_success') {
+                if ($request->filter == 'filter_success') {
                     $query->whereDoesntHave('notebookQuestions', function($q) use ($user_id) {
                         $q->where('user_id', $user_id)
                         ->where('answer_result', 1);
@@ -459,16 +391,18 @@ class NotebookController extends Controller {
                 }
 
                 if ($request->filter == 'filter_failer') {
+                    // remove qualquer questão já respondida
                     $query->whereDoesntHave('notebookQuestions', function($q) use ($user_id) {
                         $q->where('user_id', $user_id)
-                        ->whereIn('answer_result', [1,2]);
+                        ->whereNotNull('answer_result');
                     });
                 }
 
                 if ($request->filter == 'filter_eliminated') {
-                    $query->whereHas('notebookQuestions', function($q) use ($user_id) {
+                    // 🔥 corrigido: remover todas respondidas
+                    $query->whereDoesntHave('notebookQuestions', function($q) use ($user_id) {
                         $q->where('user_id', $user_id)
-                        ->where('answer_result', 2);
+                        ->whereNotNull('answer_result');
                     });
                 }
 
@@ -476,6 +410,28 @@ class NotebookController extends Controller {
                     $query->whereHas('favorites', function($q) use ($user_id) {
                         $q->where('user_id', $user_id);
                     });
+                }
+
+                return $query;
+            };
+
+            foreach ($topicIds as $topicId) {
+
+                $limit = min(
+                    $questionsPerTopic + ($remaining-- > 0 ? 1 : 0),
+                    $remainingQuestions
+                );
+
+                $query = Question::where('topic_id', $topicId)
+                    ->whereNull('simulated_id');
+
+                $query = $applyFilters($query);
+
+                if (!empty($allSelectedQuestions)) {
+                    $query->whereNotIn(
+                        'id',
+                        collect($allSelectedQuestions)->pluck('question_id')
+                    );
                 }
 
                 $questions = $query->inRandomOrder()->limit($limit)->get();
@@ -494,38 +450,23 @@ class NotebookController extends Controller {
                 $remainingQuestions -= $questions->count();
             }
 
+            // 🔥 Completar se faltar questões
             if ($remainingQuestions > 0) {
 
-                $extraQuestionsQuery = Question::whereIn('topic_id', $topicIds)->whereNotIn('id', collect($allSelectedQuestions)->pluck('question_id'));
+                $extraQuestionsQuery = Question::whereIn('topic_id', $topicIds)
+                    ->whereNull('simulated_id');
 
-                if ($request->filter == 'filter_success') {
-                    $extraQuestionsQuery->whereDoesntHave('notebookQuestions', function($q) use ($user_id) {
-                        $q->where('user_id', $user_id)
-                        ->where('answer_result', 1);
-                    });
+                $extraQuestionsQuery = $applyFilters($extraQuestionsQuery);
+
+                if (!empty($allSelectedQuestions)) {
+                    $extraQuestionsQuery->whereNotIn(
+                        'id',
+                        collect($allSelectedQuestions)->pluck('question_id')
+                    );
                 }
 
-                if ($request->filter == 'filter_failer') {
-                    $extraQuestionsQuery->whereDoesntHave('notebookQuestions', function($q) use ($user_id) {
-                        $q->where('user_id', $user_id)
-                        ->whereIn('answer_result', [1,2]);
-                    });
-                }
-
-                if ($request->filter == 'filter_eliminated') {
-                    $extraQuestionsQuery->whereHas('notebookQuestions', function($q) use ($user_id) {
-                        $q->where('user_id', $user_id)
-                        ->where('answer_result', 2);
-                    });
-                }
-
-                if ($request->filter == 'filter_favorited') {
-                    $extraQuestionsQuery->whereHas('favorites', function($q) use ($user_id) {
-                        $q->where('user_id', $user_id);
-                    });
-                }
-
-                $extraQuestions = $extraQuestionsQuery->inRandomOrder()
+                $extraQuestions = $extraQuestionsQuery
+                    ->inRandomOrder()
                     ->limit($remainingQuestions)
                     ->get();
 
@@ -542,14 +483,17 @@ class NotebookController extends Controller {
             }
 
             NotebookQuestion::insert($allSelectedQuestions);
+
             DB::commit();
 
             return redirect()
                 ->route('answer', ['notebook' => $notebook->id])
                 ->with('success', count($allSelectedQuestions) . ' questões adicionadas ao caderno com sucesso!');
+
         } catch (\Exception $e) {
             DB::rollBack();
             report($e);
+
             return back()->withErrors('Erro ao atualizar caderno: ' . $e->getMessage());
         }
     }
@@ -557,7 +501,9 @@ class NotebookController extends Controller {
     public function destroy($id) {
         
         $notebook = Notebook::find($id);
-        if ($notebook && $notebook->delete()) {
+        if ($notebook) {
+            NotebookQuestion::where('notebook_id', $notebook->id)->where('answer_result', 0)->delete();
+            $notebook->delete();
             return redirect()->back()->with('success', 'Caderno excluído com sucesso!');
         }
 
